@@ -111,16 +111,16 @@ function mouseClicked() {
 
 function draw() {
   // Keyboard controls!
-  if (keyIsDown(LEFT_ARROW)) {
+  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
     camera_velocity.x -= 1;
   }
-  if (keyIsDown(RIGHT_ARROW)) {
+  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
     camera_velocity.x += 1;
   }
-  if (keyIsDown(DOWN_ARROW)) {
+  if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
     camera_velocity.y -= 1;
   }
-  if (keyIsDown(UP_ARROW)) {
+  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
     camera_velocity.y += 1;
   }
 
