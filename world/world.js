@@ -89,16 +89,20 @@ function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y) {
   caveworld.drawTile(i, j, -ShiftY);
 
   if(x1 === x2 && y1 === y2){
-    simpleIsoTile(20, caveworld.GetHeight(i, j)*200-ShiftY, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+    //simpleIsoTile(20, caveworld.GetHeight(i, j)*200-ShiftY, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
   }
 
   if(screen_y < 400 + 16*4){
     overworld.drawTile(i, j, -ShiftY + 500);
 
-    if(x1 === x2 && y1 === y2){
-      simpleIsoTile(20, overworld.GetHeight(i, j)*100-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+    if(y1 === y2){
+      //simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/0.1*100-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
     }
   }
+
+  // if(i - 1 + 0.5 - 1/32 <= player.x + player.width/2 && j - 1 + 0.5 - 1/32 <= player.y + player.height/2 && i + 0.5 - 1/32 >= player.x - player.width/2 && j + 0.5 - 1/32 >= player.y - player.height/2){
+  //   simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+  // }
   //textSize(5);
   //fill(0);
   //text("v: " + x1, 0, 0);

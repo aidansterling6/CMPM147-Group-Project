@@ -27,7 +27,9 @@ class overworld{
             c2 = color(0, 0, 255*0.8);
             c3 = color(0, 0, 255*0.9);
         }
+        noStroke();
         simpleIsoTile(height*100, WorldHeight, tw, th, c1, c2, c3);
+        //simpleIsoTile(0, WorldHeight, tw, th, c1, c2, c3);
         //textSize(6);
         //text(height, 0, -height*100);
     }
