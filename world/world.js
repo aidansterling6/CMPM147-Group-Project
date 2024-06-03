@@ -14,7 +14,7 @@
     p3_drawAfter
 */
 
-function simpleIsoTile(height, baseHeight, c1, c2, c3){
+function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
     strokeWeight(1);
     fill(c1);
     stroke(c1);
@@ -89,14 +89,14 @@ function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y) {
   caveworld.drawTile(i, j, -ShiftY);
 
   if(x1 === x2 && y1 === y2){
-    simpleIsoTile(caveworld.GetHeight(i, j)*100 + 50, -ShiftY, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+    simpleIsoTile(20, caveworld.GetHeight(i, j)*200-ShiftY, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
   }
 
   if(screen_y < 400 + 16*4){
     overworld.drawTile(i, j, -ShiftY + 500);
 
     if(x1 === x2 && y1 === y2){
-      simpleIsoTile(overworld.GetHeight(i, j)*100 + 50, -ShiftY + 500, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+      simpleIsoTile(20, overworld.GetHeight(i, j)*100-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
     }
   }
   //textSize(5);

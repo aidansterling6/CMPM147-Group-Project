@@ -11,7 +11,7 @@ class overworld{
     }
     static drawTile(i, j, WorldHeight){
         stroke(75);
-        simpleIsoTile(50, WorldHeight - 50, color(0, 0), color(100*0.8), color(100*0.9));
+        simpleIsoTile(50, WorldHeight - 50, tw, th, color(0, 0), color(100*0.8), color(100*0.9));
 
 
         let height = overworld.GetHeight(i, j);
@@ -27,7 +27,7 @@ class overworld{
             c2 = color(0, 0, 255*0.8);
             c3 = color(0, 0, 255*0.9);
         }
-        simpleIsoTile(height*100, WorldHeight, c1, c2, c3);
+        simpleIsoTile(height*100, WorldHeight, tw, th, c1, c2, c3);
         //textSize(6);
         //text(height, 0, -height*100);
     }
