@@ -75,7 +75,7 @@ function p3_tileClicked(i, j) {
 
 function p3_drawBefore() {}
 
-function p3_drawTile(i, j) {
+function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y) {
   noStroke();
 
   if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
@@ -86,9 +86,22 @@ function p3_drawTile(i, j) {
 
   push();
 
-  overworld.drawTile(i, j, -mouseY + 500);
+  caveworld.drawTile(i, j, -ShiftY);
 
-  caveworld.drawTile(i, j, -mouseY);
+  if(x1 === x2 && y1 === y2){
+    simpleIsoTile(caveworld.GetHeight(i, j)*100 + 50, -ShiftY, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+  }
+
+  if(screen_y < 400 + 16*4){
+    overworld.drawTile(i, j, -ShiftY + 500);
+
+    if(x1 === x2 && y1 === y2){
+      simpleIsoTile(overworld.GetHeight(i, j)*100 + 50, -ShiftY + 500, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+    }
+  }
+  //textSize(5);
+  //fill(0);
+  //text("v: " + x1, 0, 0);
 
   //beginShape();
   //vertex(-tw, 0);
@@ -135,4 +148,26 @@ function p3_drawSelectedTile(i, j) {
   text("tile " + [i, j], 0, 0);
 }
 
-function p3_drawAfter() {}
+function p3_drawAfter() {
+  //text(keyCode, 200, 200)
+  if(level === 0){
+    if(abs(ShiftY - 500) < speed){
+      ShiftY = 500;
+    }
+    else if(ShiftY > 500){
+      ShiftY -= speed;
+    } else if(ShiftY < 500) {
+      ShiftY += speed;
+    }
+  }
+  if(level === 1){
+    if(abs(ShiftY - caveLevel) < speed){
+      ShiftY = caveLevel;
+    }
+    else if(ShiftY > caveLevel){
+      ShiftY -= speed;
+    } else if(ShiftY < caveLevel) {
+      ShiftY += speed;
+    }
+  }
+}
