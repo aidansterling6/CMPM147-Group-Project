@@ -15,9 +15,9 @@
 */
 
 function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
-    strokeWeight(1);
+    //strokeWeight(1);
     fill(c1);
-    stroke(c1);
+    //stroke(c1);
     //top
     beginShape();
     vertex(-tw, 0 - height - baseHeight);
@@ -26,7 +26,7 @@ function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
     vertex(0, -th - height - baseHeight);
     endShape(CLOSE);
     fill(c2);
-    stroke(c2);
+    //stroke(c2);
     //left
     beginShape();
     vertex(-tw, 0 - height - baseHeight);
@@ -35,7 +35,7 @@ function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
     vertex(0, th - height - baseHeight);
     endShape(CLOSE);
     fill(c3);
-    stroke(c3);
+    //stroke(c3);
     //right
     beginShape();
     vertex(tw, 0 - height - baseHeight);
@@ -75,7 +75,7 @@ function p3_tileClicked(i, j) {
 
 function p3_drawBefore() {}
 
-function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y) {
+function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
   noStroke();
 
   if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
@@ -93,6 +93,7 @@ function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y) {
   }
 
   if(screen_y < 400 + 16*4){
+    stroke(c);
     overworld.drawTile(i, j, -ShiftY + 500);
 
     if(y1 === y2){
