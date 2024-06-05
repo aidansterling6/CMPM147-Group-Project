@@ -15,9 +15,9 @@
 */
 
 function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
-    //strokeWeight(1);
+    strokeWeight(1);
     fill(c1);
-    //stroke(c1);
+    stroke(c1);
     //top
     beginShape();
     vertex(-tw, 0 - height - baseHeight);
@@ -26,7 +26,7 @@ function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
     vertex(0, -th - height - baseHeight);
     endShape(CLOSE);
     fill(c2);
-    //stroke(c2);
+    stroke(c2);
     //left
     beginShape();
     vertex(-tw, 0 - height - baseHeight);
@@ -35,7 +35,7 @@ function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
     vertex(0, th - height - baseHeight);
     endShape(CLOSE);
     fill(c3);
-    //stroke(c3);
+    stroke(c3);
     //right
     beginShape();
     vertex(tw, 0 - height - baseHeight);

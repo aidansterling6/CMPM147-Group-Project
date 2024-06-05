@@ -14,10 +14,9 @@ let tile_rows, tile_columns;
 let camera_offset;
 let camera_velocity;
 
-let level = 1;
+let level = 0;
 let keyTime = 0;
-//let ShiftY = 500;
-let ShiftY = -30;
+let ShiftY = 500;
 let speed = 5;
 let caveLevel = -30;
 
@@ -68,7 +67,7 @@ class Entity{
   static underworldEntities = [];
   static entities = [];
   static CurrentID = 0;
-  constructor(x, y, width, height, world, Color){
+  constructor(x, y, width, height, tileHeight, world, Color){
       this.ID = Entity.CurrentID;
       Entity.CurrentID++;
       this.x = x;
@@ -81,6 +80,7 @@ class Entity{
       this.InWorld = false;
       this.world = world;
       this.color = Color;
+      this.tileHeight = tileHeight;
       if(world === 0){
         Entity.overworldEntities.push(this);
       }
@@ -106,13 +106,13 @@ class Entity{
           if(this.world === 0){
           let tmpBase = overworld.GetDrawHeight(this.baseHeight);
           let tmpShift = ShiftY - 500;
-          simpleIsoTile(20, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+          simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
           }
 
           if(this.world === 1){
             let tmpBase = underworld.GetDrawHeight(this.baseHeight);
             let tmpShift = ShiftY;
-            simpleIsoTile(20, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+            simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
           }
           pop();
   }
@@ -132,11 +132,18 @@ function setup() {
   let canvas = createCanvas(800, 400);
   canvas.parent("container");
 
-  player1 = new Entity(0, 0, 1/3, 1/3, 0, color(255, 0, 0));
-  player2 = new Entity(0, 0, 1/3, 1/3, 0, color(0, 0, 255));
+  player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0));
+  player2 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(0, 0, 255));
 
-  player3 = new Entity(0, 0, 1/3, 1/3, 1, color(255, 0, 0));
-  player4 = new Entity(0, 0, 1/3, 1/3, 1, color(0, 0, 255));
+  player3 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(255, 0, 0));
+  player4 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
+
+  for(let t = 0; t < 20; t++){
+    new Entity((Math.random()*2-1) * 7, (Math.random()*2-1) * 7, 1/6, 1/6, 50, 0, color(0, 150, 0));
+  }
+  for(let t = 0; t < 20; t++){
+    new Entity((Math.random()*2-1) * 7, (Math.random()*2-1) * 7, 1/5, 1/5, 100, 1, color(100, 100, 100));
+  }
 
   camera_offset = new p5.Vector(-width / 2, height / 2);
   camera_velocity = new p5.Vector(0, 0);
