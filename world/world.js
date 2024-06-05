@@ -86,15 +86,15 @@ function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
 
   push();
 
-  caveworld.drawTile(i, j, -ShiftY);
+  //underworld.drawTile(i, j, -ShiftY);
 
   if(x1 === x2 && y1 === y2){
-    //simpleIsoTile(20, caveworld.GetHeight(i, j)*200-ShiftY, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+    //simpleIsoTile(20, underworld.GetHeight(i, j)*200-ShiftY, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
   }
 
   if(screen_y < 400 + 16*4){
     stroke(c);
-    overworld.drawTile(i, j, -ShiftY + 500);
+    //overworld.drawTile(i, j, -ShiftY + 500);
 
     if(y1 === y2){
       //simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/0.1*100-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
@@ -124,6 +124,59 @@ function p3_drawTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
     //     fill(0, 0, 255);
     // }
     // simpleIsoTile(height*40);
+
+  let n = clicks[[i, j]] | 0;
+  if (n % 2 == 1) {
+    //fill(0, 0, 0, 32);
+    //ellipse(0, 0, 10, 5);
+    //translate(0, -10);
+    //fill(255, 255, 100, 128);
+    //ellipse(0, 0, 10, 10);
+  }
+
+  pop();
+}
+
+function p3_drawOverworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
+  noStroke();
+
+  if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
+    fill(240, 200);
+  } else {
+    fill(255, 200);
+  }
+
+  push();
+
+  if(screen_y < 400 + 16*4){
+    stroke(c);
+    overworld.drawTile(i, j, -ShiftY + 500);
+  }
+
+  let n = clicks[[i, j]] | 0;
+  if (n % 2 == 1) {
+    //fill(0, 0, 0, 32);
+    //ellipse(0, 0, 10, 5);
+    //translate(0, -10);
+    //fill(255, 255, 100, 128);
+    //ellipse(0, 0, 10, 10);
+  }
+
+  pop();
+}
+
+function p3_drawUnderworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
+  noStroke();
+
+  if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
+    fill(240, 200);
+  } else {
+    fill(255, 200);
+  }
+
+  push();
+
+  underworld.drawTile(i, j, -ShiftY);
 
   let n = clicks[[i, j]] | 0;
   if (n % 2 == 1) {
