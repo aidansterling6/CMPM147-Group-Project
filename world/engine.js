@@ -90,7 +90,12 @@ class Character{
       push();
           translate(0 - screen_x, screen_y);
           noStroke();
-          simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/this.baseHeight*300-ShiftY + 500, tw*this.width, th*this.height, color(255, 0, 0), color(255*0.8, 0, 0), color(255*0.9, 0, 0));
+          if(this.ID === 0){
+            simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/this.baseHeight*300-ShiftY + 500, tw*this.width, th*this.height, color(255, 0, 0), color(255*0.8, 0, 0), color(255*0.9, 0, 0));
+          }
+          else {
+            simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/this.baseHeight*300-ShiftY + 500, tw*this.width, th*this.height, color(0, 0, 255), color(0, 0, 255*0.8), color(0, 0, 255*0.9));
+          }
           fill(0);
           textSize(5);
           //text(this.yValue, -5, this.baseHeight*100-ShiftY + 500 - 25);
@@ -255,7 +260,8 @@ function draw() {
     yValue: Infinity,
     tiles: [],
     lastTile: null,
-    character: -1
+    character: -1,
+    characters: null
   };
 
 
@@ -300,7 +306,8 @@ function draw() {
         yValue: -Infinity,
         tiles: [],
         lastTile: null,
-        character: i
+        character: i,
+        characters: [i]
       };
     }
   }
@@ -524,6 +531,14 @@ function draw() {
           //player.draw(world_offset, camera_offset);
         }
       }
+      for(let o = 0; o < stack.length; o++){
+        if(!stack[o].lastTile)
+        for(let p = 0; p < stack.length; p++){
+          if(o !== p && stack[p].lastTile && stack[p].lastTile.ij[0] === Character.characters[stack[o].character].farValue[0] && stack[p].lastTile.ij[1] === Character.characters[stack[o].character].farValue[1]){
+            stack[p].characters.push(stack[o].character);
+          }
+        }
+      }
       function stackSort(a, b) {
         let chara = Character.characters[a.character];
         let charb = Character.characters[b.character];
@@ -535,6 +550,18 @@ function draw() {
         // a must be equal to b
         return 0;
       }
+      function characterSort(a, b) {
+        let chara = Character.characters[a];
+        let charb = Character.characters[b];
+        if (chara.x + chara.y < charb.x + charb.y) {
+          return -1;
+        } else if (chara.x + chara.y > charb.x + charb.y) {
+          return 1;
+        }
+        // a must be equal to b
+        return 0;
+      }
+
       stack.sort(stackSort);
       for(let o = 0; o < stack.length; o++){
         let tmp = stack[o];
@@ -544,9 +571,15 @@ function draw() {
             tmpTile.ij,
             tmpTile.camxy
             , tmpTile.x1, tmpTile.y1, tmpTile.x2, tmpTile.y2, color(0, 0, 0, 0));
-        }
-        if(tmp.character !== -1){
-          Character.characters[tmp.character].draw(world_offset, camera_offset);
+          if(tmp.characters){
+            tmp.characters.sort(characterSort);
+            for(let p = 0; p < tmp.characters.length; p++){
+              Character.characters[tmp.characters[p]].draw(world_offset, camera_offset);
+            }
+            //if(tmp.character !== -1){
+              //Character.characters[tmp.character].draw(world_offset, camera_offset);
+            //}
+          }
         }
       }
       stack = [];
@@ -555,6 +588,9 @@ function draw() {
   // player.draw(world_offset, camera_offset);
   if(mouseIsPressed){
     console.log(tmpArr);
+    for(let o = 0; o < tmpArr.length; o++){
+      console.log(true && tmpArr[o].lastTile);
+    }
   }
   
   // for (let y = y0; y < y1; y++) {
