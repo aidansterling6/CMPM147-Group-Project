@@ -61,12 +61,13 @@ function worldOffsetToCamera([world_x, world_y]) {
   return new p5.Vector(camera_x, camera_y);
 }
 
-class Character{
-  static characters = [];
+//Class for drawing off-grid objects
+class Entity{
+  static entities = [];
   static CurrentID = 0;
-  constructor(x, y, width, height){
-      this.ID = Character.CurrentID;
-      Character.CurrentID++;
+  constructor(x, y, width, height, world, Color){
+      this.ID = Entity.CurrentID;
+      Entity.CurrentID++;
       this.x = x;
       this.y = y;
       this.farValue = [Infinity, Infinity];
@@ -74,9 +75,13 @@ class Character{
       this.width = width;
       this.height = height;
       this.baseHeight = 0.1;
-      Character.characters.push(this);
+      this.InWorld = false;
+      this.world = world;
+      this.color = Color;
+      Entity.entities.push(this);
   }
-  getHeight(world_offset, camera_offset){
+
+  getScreenPosition(world_offset, camera_offset){
     let [world_x, world_y] = [this.x, this.y];
     let [camera_x, camera_y] = [camera_offset.x, camera_offset.y];
     let [screen_x, screen_y] = worldToScreen(
@@ -86,36 +91,38 @@ class Character{
     return [screen_x, screen_y];
   }
   draw(world_offset, camera_offset){
-      let [screen_x, screen_y] = this.getHeight(world_offset, camera_offset);
+      let [screen_x, screen_y] = this.getScreenPosition(world_offset, camera_offset);
       push();
           translate(0 - screen_x, screen_y);
           noStroke();
-          if(this.ID === 0){
-            simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/this.baseHeight*300-ShiftY + 500, tw*this.width, th*this.height, color(255, 0, 0), color(255*0.8, 0, 0), color(255*0.9, 0, 0));
+          let tmpBase = overworld.GetDrawHeight(this.baseHeight);
+          let tmpShift = ShiftY - 500;
+          if(this.world === 1){
+            tmpBase = caveworld.GetDrawHeight(this.baseHeight);
+            tmpShift = ShiftY - 50;
           }
-          else {
-            simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/this.baseHeight*300-ShiftY + 500, tw*this.width, th*this.height, color(0, 0, 255), color(0, 0, 255*0.8), color(0, 0, 255*0.9));
-          }
+          simpleIsoTile(20, this.baseHeight*300-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+          
           fill(0);
           textSize(5);
-          //text(this.yValue, -5, this.baseHeight*100-ShiftY + 500 - 25);
           pop();
-      //console.log([this.x, this.y]);
   }
 }
 
-let player1 = new Character(0, 0, 1/3, 1/3);
-let player2 = new Character(0, 0, 1/3, 1/3);
+let player1;
+let player2;
 
 function preload() {
   if (window.p3_preload) {
     window.p3_preload();
   }
 }
-
 function setup() {
   let canvas = createCanvas(800, 400);
   canvas.parent("container");
+
+  player1 = new Entity(0, 0, 1/3, 1/3, 0, color(255, 0, 0));
+  player2 = new Entity(0, 0, 1/3, 1/3, 0, color(0, 0, 255));
 
   camera_offset = new p5.Vector(-width / 2, height / 2);
   camera_velocity = new p5.Vector(0, 0);
@@ -260,44 +267,14 @@ function draw() {
     yValue: Infinity,
     tiles: [],
     lastTile: null,
-    character: -1,
-    characters: null
+    entity: -1,
+    entities: null
   };
 
-
-
-  // for (let y = y0; y < y1; y++) {
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + world_offset.x,
-  //       y - world_offset.y
-  //     ]);
-  //     if(i - 1 + 0.5 - 1/32 <= player.x + player.width/2 && j - 1 + 0.5 - 1/32 <= player.y + player.height/2 && i + 0.5 - 1/32 >= player.x - player.width/2 && j + 0.5 - 1/32 >= player.y - player.height/2){
-  //       simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
-  //       let tmpHeight = overworld.GetHeight(i, j);
-  //       if(tmpHeight > player.baseHeight){
-  //        player.baseHeight = tmpHeight;
-  //       }
-  //     }
-  //   }
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + 0.5 + world_offset.x,
-  //       y + 0.5 - world_offset.y
-  //     ]);
-  //     if(i - 1 + 0.5 - 1/32 <= player.x + player.width/2 && j - 1 + 0.5 - 1/32 <= player.y + player.height/2 && i + 0.5 - 1/32 >= player.x - player.width/2 && j + 0.5 - 1/32 >= player.y - player.height/2){
-  //       simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
-  //       let tmpHeight = overworld.GetHeight(i, j);
-  //       if(tmpHeight > player.baseHeight){
-  //        player.baseHeight = tmpHeight;
-  //       }
-  //     }
-  //   }
-  // }
-
-  for(let i = 0; i < Character.characters.length; i++){
-    let tmpChar = Character.characters[i];
-    let tmpHeight = tmpChar.getHeight(world_offset, camera_offset);
+  for(let i = 0; i < Entity.entities.length; i++){
+    let tmpChar = Entity.entities[i];
+    let tmpHeight = tmpChar.getScreenPosition(world_offset, camera_offset);
+    tmpChar.InWorld = false;
     tmpChar.baseHeight = -Infinity;
     tmpChar.yValue = -Infinity;
     tmpChar.farValue = [-Infinity, -Infinity];
@@ -306,8 +283,8 @@ function draw() {
         yValue: -Infinity,
         tiles: [],
         lastTile: null,
-        character: i,
-        characters: [i]
+        entity: i,
+        entities: [i]
       };
     }
   }
@@ -321,16 +298,17 @@ function draw() {
       ]);
       let miny = Infinity;
       let minChar = -1;
-      for(let index = 0; index < Character.characters.length; index++){
-        if(i - 1 + 0.5 - 1/32 <= Character.characters[index].x + Character.characters[index].width/2 && j - 1 + 0.5 - 1/32 <= Character.characters[index].y + Character.characters[index].height/2 && i + 0.5 - 1/32 >= Character.characters[index].x - Character.characters[index].width/2 && j + 0.5 - 1/32 >= Character.characters[index].y - Character.characters[index].height/2){
-          simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+      for(let index = 0; index < Entity.entities.length; index++){
+        if(i - 1 + 0.5 - 1/32 <= Entity.entities[index].x + Entity.entities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.entities[index].y + Entity.entities[index].height/2 && i + 0.5 - 1/32 >= Entity.entities[index].x - Entity.entities[index].width/2 && j + 0.5 - 1/32 >= Entity.entities[index].y - Entity.entities[index].height/2){
+          //simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+          Entity.entities[index].InWorld = true;
           let tmpHeight = overworld.GetHeight(i, j);
-          if(tmpHeight > Character.characters[index].baseHeight){
-            Character.characters[index].baseHeight = tmpHeight;
+          if(tmpHeight > Entity.entities[index].baseHeight){
+            Entity.entities[index].baseHeight = tmpHeight;
           }
-          if(i + j > Character.characters[index].farValue[0] + Character.characters[index].farValue[1]){
-            Character.characters[index].farValue = [i, j];
-            Character.characters[index].yValue = i + j;
+          if(i + j > Entity.entities[index].farValue[0] + Entity.entities[index].farValue[1]){
+            Entity.entities[index].farValue = [i, j];
+            Entity.entities[index].yValue = i + j;
           }
         }
       }
@@ -342,16 +320,17 @@ function draw() {
       ]);
       let miny = Infinity;
       let minChar = -1;
-      for(let index = 0; index < Character.characters.length; index++){
-        if(i - 1 + 0.5 - 1/32 <= Character.characters[index].x + Character.characters[index].width/2 && j - 1 + 0.5 - 1/32 <= Character.characters[index].y + Character.characters[index].height/2 && i + 0.5 - 1/32 >= Character.characters[index].x - Character.characters[index].width/2 && j + 0.5 - 1/32 >= Character.characters[index].y - Character.characters[index].height/2){
-          simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+      for(let index = 0; index < Entity.entities.length; index++){
+        if(i - 1 + 0.5 - 1/32 <= Entity.entities[index].x + Entity.entities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.entities[index].y + Entity.entities[index].height/2 && i + 0.5 - 1/32 >= Entity.entities[index].x - Entity.entities[index].width/2 && j + 0.5 - 1/32 >= Entity.entities[index].y - Entity.entities[index].height/2){
+          //simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+          Entity.entities[index].InWorld = true;
           let tmpHeight = overworld.GetHeight(i, j);
-          if(tmpHeight > Character.characters[index].baseHeight){
-            Character.characters[index].baseHeight = tmpHeight;
+          if(tmpHeight > Entity.entities[index].baseHeight){
+            Entity.entities[index].baseHeight = tmpHeight;
           }
-          if(i + j > Character.characters[index].farValue[0] + Character.characters[index].farValue[1]){
-            Character.characters[index].farValue = [i, j];
-            Character.characters[index].yValue = i + j;
+          if(i + j > Entity.entities[index].farValue[0] + Entity.entities[index].farValue[1]){
+            Entity.entities[index].farValue = [i, j];
+            Entity.entities[index].yValue = i + j;
           }
         }
       }
@@ -368,27 +347,21 @@ function draw() {
       let miny = Infinity;
       let minij = [Infinity, Infinity];
       let minChar = -1;
-      for(let index = 0; index < Character.characters.length; index++){
-        if(i - 1 + 0.5 - 1/32 <= Character.characters[index].x + Character.characters[index].width/2 && j - 1 + 0.5 - 1/32 <= Character.characters[index].y + Character.characters[index].height/2){
-          // if(Character.characters[index].yValue < miny){
-          //   miny = Character.characters[index].yValue;
-          //   minChar = index;
-          // }
-          if(Character.characters[index].farValue[0] + Character.characters[index].farValue[1] < minij[0] + minij[1]){
-            minij = Character.characters[index].farValue;
-            minChar = index;
-          }
-          if(Character.characters[index].farValue[0] === i && Character.characters[index].farValue[1] === j){
-            isVPoint = true;
-          }
-          // drawTile(
-          //   [i, j],
-          //   [camera_offset.x,camera_offset.y], 
-          //   round(x), round(y), round(centerx), round(centery)); // odd row
+        for(let index = 0; index < Entity.entities.length; index++){
+          if(Entity.entities[index].InWorld){
+            if(i - 1 + 0.5 - 1/32 <= Entity.entities[index].x + Entity.entities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.entities[index].y + Entity.entities[index].height/2){
+              if(Entity.entities[index].farValue[0] + Entity.entities[index].farValue[1] < minij[0] + minij[1]){
+                minij = Entity.entities[index].farValue;
+                minChar = index;
+              }
+              if(Entity.entities[index].farValue[0] === i && Entity.entities[index].farValue[1] === j){
+                isVPoint = true;
+              }
+            }
           }
         }
       if(minChar >= 0 && !isVPoint){
-        let tmpChar = Character.characters[minChar];
+        let tmpChar = Entity.entities[minChar];
         VPasses[tmpChar.ID].tiles.push(
           {
             ij: [i, j],
@@ -413,7 +386,7 @@ function draw() {
         );
       }
       else if(minChar >= 0 && isVPoint) {
-        let tmpChar = Character.characters[minChar];
+        let tmpChar = Entity.entities[minChar];
         VPasses[tmpChar.ID].lastTile = 
           {
             ij: [i, j],
@@ -433,23 +406,21 @@ function draw() {
       let isVPoint = false;
       let minij = [Infinity, Infinity];
       let minChar = -1;
-      for(let index = 0; index < Character.characters.length; index++){
-        if(i - 1 + 0.5 - 1/32 <= Character.characters[index].x + Character.characters[index].width/2 && j - 1 + 0.5 - 1/32 <= Character.characters[index].y + Character.characters[index].height/2){
-          if(Character.characters[index].farValue[0] + Character.characters[index].farValue[1] < minij[0] + minij[1]){
-            minij = Character.characters[index].farValue;
-            minChar = index;
+      for(let index = 0; index < Entity.entities.length; index++){
+        if(Entity.entities[index].InWorld){
+          if(i - 1 + 0.5 - 1/32 <= Entity.entities[index].x + Entity.entities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.entities[index].y + Entity.entities[index].height/2){
+            if(Entity.entities[index].farValue[0] + Entity.entities[index].farValue[1] < minij[0] + minij[1]){
+              minij = Entity.entities[index].farValue;
+              minChar = index;
+            }
+            if(Entity.entities[index].farValue[0] === i && Entity.entities[index].farValue[1] === j){
+              isVPoint = true;
+            }
           }
-          if(Character.characters[index].farValue[0] === i && Character.characters[index].farValue[1] === j){
-            isVPoint = true;
-          }
-          // drawTile(
-          //   [i, j],
-          //   [camera_offset.x, camera_offset.y]
-          //   , 0, 0, 1, 1); // even rows are offset horizontally
         }
       }
       if(minChar >= 0 && !isVPoint){
-        let tmpChar = Character.characters[minChar];
+        let tmpChar = Entity.entities[minChar];
         VPasses[tmpChar.ID].tiles.push(
           {
             ij: [i, j],
@@ -474,7 +445,7 @@ function draw() {
         );
       }
       else if(minChar >= 0 && isVPoint) {
-        let tmpChar = Character.characters[minChar];
+        let tmpChar = Entity.entities[minChar];
         VPasses[tmpChar.ID].lastTile = 
           {
             ij: [i, j],
@@ -487,7 +458,6 @@ function draw() {
       }
     }
   }
-  //player.draw(world_offset, camera_offset);
 
   function compareFn(a, b) {
     if (a.yValue < b.yValue) {
@@ -501,9 +471,9 @@ function draw() {
   let tmpArr = [];
   for(let key in VPasses){
     VPasses[key].farValue = [Infinity, Infinity];
-    if(VPasses[key].character !== -1){
-      VPasses[key].farValue = Character.characters[VPasses[key].character].farValue;
-      VPasses[key].yValue = Character.characters[VPasses[key].character].farValue[0] + Character.characters[VPasses[key].character].farValue[1];
+    if(VPasses[key].entity !== -1){
+      VPasses[key].farValue = Entity.entities[VPasses[key].entity].farValue;
+      VPasses[key].yValue = Entity.entities[VPasses[key].entity].farValue[0] + Entity.entities[VPasses[key].entity].farValue[1];
     }
     tmpArr.push(VPasses[key]);
 
@@ -520,28 +490,24 @@ function draw() {
         let tmp = stack[o];
         for(let index = 0; index < tmp.tiles.length; index++){
           let tmptiles = tmp.tiles[index];
-          // if(Character.characters[tmp.charactor]){
-          //   Character.characters[tmp.charactor].draw(world_offset, camera_offset);
-          // }
           drawTile(
             tmptiles.ij,
             tmptiles.camxy
             , tmptiles.x1, tmptiles.y1, tmptiles.x2, tmptiles.y2, color(0, 0, 0, 0)); // even rows are offset horizontally
-          //if(tmp.)
-          //player.draw(world_offset, camera_offset);
         }
       }
       for(let o = 0; o < stack.length; o++){
-        if(!stack[o].lastTile)
-        for(let p = 0; p < stack.length; p++){
-          if(o !== p && stack[p].lastTile && stack[p].lastTile.ij[0] === Character.characters[stack[o].character].farValue[0] && stack[p].lastTile.ij[1] === Character.characters[stack[o].character].farValue[1]){
-            stack[p].characters.push(stack[o].character);
+        if(!stack[o].lastTile && stack[o].entity !== -1 && Entity.entities[stack[o].entity].InWorld){
+          for(let p = 0; p < stack.length; p++){
+            if(o !== p && stack[p].lastTile && stack[p].lastTile.ij[0] === Entity.entities[stack[o].entity].farValue[0] && stack[p].lastTile.ij[1] === Entity.entities[stack[o].entity].farValue[1]){
+              stack[p].entities.push(stack[o].entity);
+            }
           }
         }
       }
       function stackSort(a, b) {
-        let chara = Character.characters[a.character];
-        let charb = Character.characters[b.character];
+        let chara = Entity.entities[a.entity];
+        let charb = Entity.entities[b.entity];
         if (chara.baseHeight < charb.baseHeight) {
           return -1;
         } else if (chara.baseHeight > charb.baseHeight) {
@@ -550,9 +516,9 @@ function draw() {
         // a must be equal to b
         return 0;
       }
-      function characterSort(a, b) {
-        let chara = Character.characters[a];
-        let charb = Character.characters[b];
+      function entitySort(a, b) {
+        let chara = Entity.entities[a];
+        let charb = Entity.entities[b];
         if (chara.x + chara.y < charb.x + charb.y) {
           return -1;
         } else if (chara.x + chara.y > charb.x + charb.y) {
@@ -571,58 +537,23 @@ function draw() {
             tmpTile.ij,
             tmpTile.camxy
             , tmpTile.x1, tmpTile.y1, tmpTile.x2, tmpTile.y2, color(0, 0, 0, 0));
-          if(tmp.characters){
-            tmp.characters.sort(characterSort);
-            for(let p = 0; p < tmp.characters.length; p++){
-              Character.characters[tmp.characters[p]].draw(world_offset, camera_offset);
+          if(tmp.entities){
+            tmp.entities.sort(entitySort);
+            for(let p = 0; p < tmp.entities.length; p++){
+              Entity.entities[tmp.entities[p]].draw(world_offset, camera_offset);
             }
-            //if(tmp.character !== -1){
-              //Character.characters[tmp.character].draw(world_offset, camera_offset);
-            //}
           }
         }
       }
       stack = [];
     }
   }
-  // player.draw(world_offset, camera_offset);
   if(mouseIsPressed){
     console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
       console.log(true && tmpArr[o].lastTile);
     }
   }
-  
-  // for (let y = y0; y < y1; y++) {
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + world_offset.x,
-  //       y - world_offset.y
-  //     ]);
-  //     if(i - 1 + 0.5 - 1/32 > player.x + player.width/2 || j - 1 + 0.5 - 1/32 > player.y + player.height/2){
-  //     drawTile(
-  //       [i, j],
-  //       [camera_offset.x,camera_offset.y], 
-  //       round(x), round(y), round(centerx), round(centery)); // odd row
-  //     }
-  //   }
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + 0.5 + world_offset.x,
-  //       y + 0.5 - world_offset.y
-  //     ]);
-  //     if(i - 1 + 0.5 - 1/32 > player.x + player.width/2 || j - 1 + 0.5 - 1/32 > player.y + player.height/2){
-  //     drawTile(
-  //       [i, j],
-  //       [camera_offset.x, camera_offset.y]
-  //       , 0, 0, 1, 1); // even rows are offset horizontally
-  //     }
-  //   }
-  // }
-  
-  // if(i - 1 + 0.5 - 1/32 > player.x + player.width/2 && j - 1 + 0.5 - 1/32 > player.y + player.height/2){
-  //   simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
-  // }
   describeMouseTile(world_pos, [camera_offset.x, camera_offset.y]);
 
   if (window.p3_drawAfter) {

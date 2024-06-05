@@ -1,4 +1,5 @@
 class overworld{
+    static multiplier = 300;
     static GetHeight(i, j){
         let base = (noise(i/7 + 325567, j/7 + 467353) +  noise(i/7 + 543363, j/7 - 35346))/2;
         let height = base;
@@ -8,6 +9,9 @@ class overworld{
             height = 0.1;
         }
         return height;
+    }
+    static GetDrawHeight(height){
+        return height * overworld.multiplier;
     }
     static drawTile(i, j, WorldHeight){
         //stroke(75);
@@ -28,7 +32,7 @@ class overworld{
             c3 = color(0, 0, 255*0.9);
         }
         //noStroke();
-        simpleIsoTile(height*300, WorldHeight, tw, th, c1, c2, c3);
+        simpleIsoTile(overworld.GetDrawHeight(height), WorldHeight, tw, th, c1, c2, c3);
         //simpleIsoTile(0, WorldHeight, tw, th, c1, c2, c3);
         //textSize(6);
         //text(height, 0, -height*100);

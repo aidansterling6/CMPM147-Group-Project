@@ -1,4 +1,5 @@
 class caveworld{
+    static multiplier = 200;
     static GetHeight(i, j){
         let base = (noise(i/7 + 3453, j/7 - 56433) +  noise(i/7 - 353433, j/7 + 76556))/2;
         let height = base;
@@ -8,6 +9,9 @@ class caveworld{
             height = 0.1;
         }
         return height;
+    }
+    static GetDrawHeight(height){
+        return height * caveworld.multiplier;
     }
     static drawTile(i, j, WorldHeight){
         stroke(75);
@@ -27,7 +31,7 @@ class caveworld{
             c2 = color(150*0.8);
             c3 = color(150*0.9);
         }
-        simpleIsoTile(height*200, WorldHeight, tw, th, c1, c2, c3);
+        simpleIsoTile(caveworld.GetDrawHeight(height), WorldHeight, tw, th, c1, c2, c3);
         //textSize(6);
         //text(height, 0, -height*100);
     }
