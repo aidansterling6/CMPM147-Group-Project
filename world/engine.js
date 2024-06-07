@@ -123,16 +123,21 @@ let player2;
 let player3;
 let player4;
 
-let overworld_ambience, underworld_ambience, osc;
+// Audio Globals
+let overworld_ambience, underworld_ambience, osc, bird_sfx, bones_sfx;
+let cave_reverb;
 
 function preload() {
   if (window.p3_preload) {
     window.p3_preload();
   }
 
-  soundFormats('wav');
+  // Audio preloads
+  soundFormats('wav', 'mp3');
   overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
   underworld_ambience = loadSound('../audio-assets/478812__ianstargem__ambience-4 (1).wav');
+  bird_sfx = loadSound('../audio-assets/361470__jofae__crow-caw.mp3');
+  bones_sfx = loadSound('../audio-assets/202102__spookymodem__rattling-bones.wav');
   osc = new p5.Oscillator('sine');
 }
 
@@ -173,6 +178,10 @@ function setup() {
   createP("Arrow keys scroll. Press e to toggle world.").parent("container");
 
   rebuildWorld(input.value());
+
+  // Audio Setup
+  cave_reverb = new p5.Reverb();
+  cave_reverb.process(bones_sfx);
 
   osc.freq(0.05);
   osc.start();
@@ -803,11 +812,25 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
 
 function draw() {
 
-  let overworldAmbienceVolume = map(ShiftY, caveLevel, 500, 0.0, 1.0);
-  let underworldAmbienceVolume = map (ShiftY, caveLevel, 500, 1.0, 0.0);
+  let overworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.0, 0.8);
+  let underworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.8, 0.0);
 
-  overworld_ambience.setVolume(overworldAmbienceVolume);
-  underworld_ambience.setVolume(underworldAmbienceVolume);
+  let bird_rate = random(0, 1) * random(0, 1);
+  if (bird_rate > 0.85 && !bird_sfx.isPlaying()) {
+    console.log("caw");
+    bird_sfx.setVolume(min(overworld_ambience_volume, random(0.3, 0.7)));
+    bird_sfx.play();
+  }
+  
+  let bone_rate = noise(0.07 * frameCount);
+  if (bone_rate > 0.75 && !bones_sfx.isPlaying()) {
+    console.log("rattle");
+    bones_sfx.setVolume(min(underworld_ambience_volume, random(0.3, 0.7)));
+    bones_sfx.play();
+  }
+
+  overworld_ambience.setVolume(overworld_ambience_volume);
+  underworld_ambience.setVolume(underworld_ambience_volume);
 
   if(keyIsDown(69) && keyTime <= 0){
     if(level === 0){
