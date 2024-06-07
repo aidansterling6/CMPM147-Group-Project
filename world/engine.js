@@ -123,7 +123,7 @@ let player2;
 let player3;
 let player4;
 
-let wind_sfx;
+let overworld_ambience, underworld_ambience, osc;
 
 function preload() {
   if (window.p3_preload) {
@@ -131,8 +131,11 @@ function preload() {
   }
 
   soundFormats('wav');
-  wind_sfx = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
+  overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
+  underworld_ambience = loadSound('../audio-assets/478812__ianstargem__ambience-4 (1).wav');
+  osc = new p5.Oscillator('sine');
 }
+
 function setup() {
   let canvas = createCanvas(800, 400);
   canvas.parent("container");
@@ -171,8 +174,17 @@ function setup() {
 
   rebuildWorld(input.value());
 
-  wind_sfx.play();
-  wind_sfx.setLoop(true);
+  osc.freq(0.05);
+  osc.start();
+  osc.disconnect();
+
+  overworld_ambience.play();
+  overworld_ambience.setLoop(true);
+  overworld_ambience.setVolume(0);
+
+  underworld_ambience.play();
+  underworld_ambience.setLoop(true);
+  underworld_ambience.setVolume(0);
 }
 
 function rebuildWorld(key) {
@@ -790,6 +802,12 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
 
 
 function draw() {
+
+  let overworldAmbienceVolume = map(ShiftY, caveLevel, 500, 0.0, 1.0);
+  let underworldAmbienceVolume = map (ShiftY, caveLevel, 500, 1.0, 0.0);
+
+  overworld_ambience.setVolume(overworldAmbienceVolume);
+  underworld_ambience.setVolume(underworldAmbienceVolume);
 
   if(keyIsDown(69) && keyTime <= 0){
     if(level === 0){
