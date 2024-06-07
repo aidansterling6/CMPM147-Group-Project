@@ -123,10 +123,15 @@ let player2;
 let player3;
 let player4;
 
+let wind_sfx;
+
 function preload() {
   if (window.p3_preload) {
     window.p3_preload();
   }
+
+  soundFormats('wav');
+  wind_sfx = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
 }
 function setup() {
   let canvas = createCanvas(800, 400);
@@ -165,6 +170,9 @@ function setup() {
   createP("Arrow keys scroll. Press e to toggle world.").parent("container");
 
   rebuildWorld(input.value());
+
+  wind_sfx.play();
+  wind_sfx.setLoop(true);
 }
 
 function rebuildWorld(key) {
