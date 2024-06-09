@@ -30,6 +30,15 @@ function worldToScreen([world_x, world_y], [camera_x, camera_y]) {
   return [i + camera_x, j + camera_y];
 }
 
+function cameraToEntity(entity){
+  console.log(entity.baseHeight);
+  let tmp = worldToScreen([entity.x, entity.y], [0, 0]);
+  let targetX = -tmp[0] - width/2;
+  let targetY = -tmp[1] + height/2 + entity.drawHeight;
+  camera_offset.x = camera_offset.x*0.9 + targetX*0.1;
+  camera_offset.y = camera_offset.y*0.9 + targetY*0.1;
+}
+
 function worldToCamera([world_x, world_y], [camera_x, camera_y]) {
   let i = (world_x - world_y) * tile_width_step_main;
   let j = (world_x + world_y) * tile_height_step_main;
@@ -77,6 +86,7 @@ class Entity{
       this.width = width;
       this.height = height;
       this.baseHeight = 0.1;
+      this.drawHeight = 0;
       this.InWorld = false;
       this.world = world;
       this.color = Color;
@@ -104,13 +114,13 @@ class Entity{
           translate(0 - screen_x, screen_y);
           noStroke();
           if(this.world === 0){
-          let tmpBase = overworld.GetDrawHeight(this.baseHeight);
+          let tmpBase = this.drawHeight;
           let tmpShift = ShiftY - 500;
           simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
           }
 
           if(this.world === 1){
-            let tmpBase = underworld.GetDrawHeight(this.baseHeight);
+            let tmpBase = this.drawHeight;
             let tmpShift = ShiftY;
             simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
           }
@@ -120,8 +130,8 @@ class Entity{
 
 let player1;
 let player2;
-let player3;
-let player4;
+//let player3;
+////let player4;
 
 function preload() {
   if (window.p3_preload) {
@@ -133,10 +143,10 @@ function setup() {
   canvas.parent("container");
 
   player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0));
-  player2 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(0, 0, 255));
+  player2 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
 
-  player3 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(255, 0, 0));
-  player4 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
+  //player3 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(255, 0, 0));
+  //player4 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
 
   for(let t = 0; t < 20; t++){
     new Entity((Math.random()*2-1) * 7, (Math.random()*2-1) * 7, 1/6, 1/6, 50, 0, color(0, 150, 0));
@@ -234,6 +244,7 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
           let tmpHeight = overworld.GetHeight(i, j);
           if(tmpHeight > Entity.overworldEntities[index].baseHeight){
             Entity.overworldEntities[index].baseHeight = tmpHeight;
+            Entity.overworldEntities[index].drawHeight = overworld.GetDrawHeight(tmpHeight);
           }
           if(i + j > Entity.overworldEntities[index].farValue[0] + Entity.overworldEntities[index].farValue[1]){
             Entity.overworldEntities[index].farValue = [i, j];
@@ -256,6 +267,7 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
           let tmpHeight = overworld.GetHeight(i, j);
           if(tmpHeight > Entity.overworldEntities[index].baseHeight){
             Entity.overworldEntities[index].baseHeight = tmpHeight;
+            Entity.overworldEntities[index].drawHeight = overworld.GetDrawHeight(tmpHeight);
           }
           if(i + j > Entity.overworldEntities[index].farValue[0] + Entity.overworldEntities[index].farValue[1]){
             Entity.overworldEntities[index].farValue = [i, j];
@@ -528,6 +540,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
           let tmpHeight = underworld.GetHeight(i, j);
           if(tmpHeight > Entity.underworldEntities[index].baseHeight){
             Entity.underworldEntities[index].baseHeight = tmpHeight;
+            Entity.underworldEntities[index].drawHeight = underworld.GetDrawHeight(tmpHeight);
           }
           if(i + j > Entity.underworldEntities[index].farValue[0] + Entity.underworldEntities[index].farValue[1]){
             Entity.underworldEntities[index].farValue = [i, j];
@@ -550,6 +563,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
           let tmpHeight = underworld.GetHeight(i, j);
           if(tmpHeight > Entity.underworldEntities[index].baseHeight){
             Entity.underworldEntities[index].baseHeight = tmpHeight;
+            Entity.underworldEntities[index].drawHeight = underworld.GetDrawHeight(tmpHeight);
           }
           if(i + j > Entity.underworldEntities[index].farValue[0] + Entity.underworldEntities[index].farValue[1]){
             Entity.underworldEntities[index].farValue = [i, j];
@@ -759,7 +773,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
           drawUnderworldTile(
             tmpTile.ij,
             tmpTile.camxy
-            , tmpTile.x1, tmpTile.y1, tmpTile.x2, tmpTile.y2, color(0, 0, 0, 0));
+            , tmpTile.x1, tmpTile.y1, tmpTile.x2, tmpTile.y2, color(0, 0, 0, 0), tmpTile.ij[0]);
           if(tmp.entities){
             tmp.entities.sort(entitySort);
             for(let p = 0; p < tmp.entities.length; p++){
@@ -794,89 +808,32 @@ function draw() {
   keyTime--;
   if(ShiftY === 500 || ShiftY === caveLevel){
     // Keyboard controls!
-    // if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
-    //   camera_velocity.x -= 1;
-    // }
-    // if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
-    //   camera_velocity.x += 1;
-    // }
-    // if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
-    //   camera_velocity.y -= 1;
-    // }
-    // if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
-    //   camera_velocity.y += 1;
-    // }
-    if (keyIsDown(65)) {
+     if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
       player1.x += 0.05;
       player1.y -= 0.05;
-    }
-    if (keyIsDown(68)) {
-      player1.x -= 0.05;
+     }
+     if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+    player1.x -= 0.05;
       player1.y += 0.05;
-    }
-    if (keyIsDown(83)) {
-      player1.x += 0.05;
+     }
+     if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
+    player1.x += 0.05;
       player1.y += 0.05;
-    }
-    if (keyIsDown(87)) {
+     }
+     if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
       player1.x -= 0.05;
       player1.y -= 0.05;
     }
+    player2.x = player1.x;
+    player2.y = player1.y;
 
-
-    if (keyIsDown(LEFT_ARROW)) {
-      player2.x += 0.05;
-      player2.y -= 0.05;
-    }
-    if (keyIsDown(RIGHT_ARROW)) {
-      player2.x -= 0.05;
-      player2.y += 0.05;
-    }
-    if (keyIsDown(DOWN_ARROW)) {
-      player2.x += 0.05;
-      player2.y += 0.05;
-    }
-    if (keyIsDown(UP_ARROW)) {
-      player2.x -= 0.05;
-      player2.y -= 0.05;
+    //move camera to player
+    if(level === 0){
+      cameraToEntity(player1);
+    } else {
+      cameraToEntity(player2);
     }
 
-
-
-    if (keyIsDown(65)) {
-      player3.x += 0.05;
-      player3.y -= 0.05;
-    }
-    if (keyIsDown(68)) {
-      player3.x -= 0.05;
-      player3.y += 0.05;
-    }
-    if (keyIsDown(83)) {
-      player3.x += 0.05;
-      player3.y += 0.05;
-    }
-    if (keyIsDown(87)) {
-      player3.x -= 0.05;
-      player3.y -= 0.05;
-    }
-
-
-    if (keyIsDown(LEFT_ARROW)) {
-      player4.x += 0.05;
-      player4.y -= 0.05;
-    }
-    if (keyIsDown(RIGHT_ARROW)) {
-      player4.x -= 0.05;
-      player4.y += 0.05;
-    }
-    if (keyIsDown(DOWN_ARROW)) {
-      player4.x += 0.05;
-      player4.y += 0.05;
-    }
-    if (keyIsDown(UP_ARROW)) {
-      player4.x -= 0.05;
-      player4.y -= 0.05;
-    }
   }
 
   let camera_delta = new p5.Vector(0, 0);
@@ -910,300 +867,6 @@ function draw() {
 
   let centerx = round((x0 + x1)/2);
   let centery = round((y0 + y1)/2);
-  //player.baseHeight = -Infinity;
-
-  // let VPasses = {};
-  // VPasses[-1] = {
-  //   yValue: Infinity,
-  //   tiles: [],
-  //   lastTile: null,
-  //   entity: -1,
-  //   entities: null
-  // };
-
-  // for(let i = 0; i < Entity.overworldEntities.length; i++){
-  //   let tmpChar = Entity.overworldEntities[i];
-  //   let tmpHeight = tmpChar.getScreenPosition(world_offset, camera_offset);
-  //   tmpChar.InWorld = false;
-  //   tmpChar.baseHeight = -Infinity;
-  //   tmpChar.yValue = -Infinity;
-  //   tmpChar.farValue = [-Infinity, -Infinity];
-  //   if(!VPasses[tmpChar.ID]){
-  //     VPasses[tmpChar.ID] = {
-  //       yValue: -Infinity,
-  //       tiles: [],
-  //       lastTile: null,
-  //       entity: i,
-  //       entities: [i]
-  //     };
-  //   }
-  // }
-
-
-  // for (let y = y0; y < y1; y++) {
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + world_offset.x,
-  //       y - world_offset.y
-  //     ]);
-  //     let miny = Infinity;
-  //     let minChar = -1;
-  //     for(let index = 0; index < Entity.overworldEntities.length; index++){
-  //       if(i - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].x + Entity.overworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].y + Entity.overworldEntities[index].height/2 && i + 0.5 - 1/32 >= Entity.overworldEntities[index].x - Entity.overworldEntities[index].width/2 && j + 0.5 - 1/32 >= Entity.overworldEntities[index].y - Entity.overworldEntities[index].height/2){
-  //         //simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
-  //         Entity.overworldEntities[index].InWorld = true;
-  //         let tmpHeight = overworld.GetHeight(i, j);
-  //         if(tmpHeight > Entity.overworldEntities[index].baseHeight){
-  //           Entity.overworldEntities[index].baseHeight = tmpHeight;
-  //         }
-  //         if(i + j > Entity.overworldEntities[index].farValue[0] + Entity.overworldEntities[index].farValue[1]){
-  //           Entity.overworldEntities[index].farValue = [i, j];
-  //           Entity.overworldEntities[index].yValue = i + j;
-  //         }
-  //       }
-  //     }
-  //   }
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + 0.5 + world_offset.x,
-  //       y + 0.5 - world_offset.y
-  //     ]);
-  //     let miny = Infinity;
-  //     let minChar = -1;
-  //     for(let index = 0; index < Entity.overworldEntities.length; index++){
-  //       if(i - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].x + Entity.overworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].y + Entity.overworldEntities[index].height/2 && i + 0.5 - 1/32 >= Entity.overworldEntities[index].x - Entity.overworldEntities[index].width/2 && j + 0.5 - 1/32 >= Entity.overworldEntities[index].y - Entity.overworldEntities[index].height/2){
-  //         //simpleIsoTile(20, /*overworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
-  //         Entity.overworldEntities[index].InWorld = true;
-  //         let tmpHeight = overworld.GetHeight(i, j);
-  //         if(tmpHeight > Entity.overworldEntities[index].baseHeight){
-  //           Entity.overworldEntities[index].baseHeight = tmpHeight;
-  //         }
-  //         if(i + j > Entity.overworldEntities[index].farValue[0] + Entity.overworldEntities[index].farValue[1]){
-  //           Entity.overworldEntities[index].farValue = [i, j];
-  //           Entity.overworldEntities[index].yValue = i + j;
-  //         }
-  //       }
-  //     }
-  //   }
-  // }
-
-  // for (let y = y0; y < y1; y++) {
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + world_offset.x,
-  //       y - world_offset.y
-  //     ]);
-  //     let isVPoint = false;
-  //     let miny = Infinity;
-  //     let minij = [Infinity, Infinity];
-  //     let minChar = -1;
-  //       for(let index = 0; index < Entity.overworldEntities.length; index++){
-  //         if(Entity.overworldEntities[index].InWorld){
-  //           if(i - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].x + Entity.overworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].y + Entity.overworldEntities[index].height/2){
-  //             if(Entity.overworldEntities[index].farValue[0] + Entity.overworldEntities[index].farValue[1] < minij[0] + minij[1]){
-  //               minij = Entity.overworldEntities[index].farValue;
-  //               minChar = index;
-  //             }
-  //             if(Entity.overworldEntities[index].farValue[0] === i && Entity.overworldEntities[index].farValue[1] === j){
-  //               isVPoint = true;
-  //             }
-  //           }
-  //         }
-  //       }
-  //     if(minChar >= 0 && !isVPoint){
-  //       let tmpChar = Entity.overworldEntities[minChar];
-  //       VPasses[tmpChar.ID].tiles.push(
-  //         {
-  //           ij: [i, j],
-  //           camxy: [camera_offset.x,camera_offset.y],
-  //           x1: round(x),
-  //           y1: round(y),
-  //           x2: round(centerx),
-  //           y2: round(centery)
-  //         }
-  //       );
-  //     }
-  //     else if(!isVPoint) {
-  //       VPasses[-1].tiles.push(
-  //         {
-  //           ij: [i, j],
-  //           camxy: [camera_offset.x,camera_offset.y],
-  //           x1: round(x),
-  //           y1: round(y),
-  //           x2: round(centerx),
-  //           y2: round(centery)
-  //         }
-  //       );
-  //     }
-  //     else if(minChar >= 0 && isVPoint) {
-  //       let tmpChar = Entity.overworldEntities[minChar];
-  //       VPasses[tmpChar.ID].lastTile = 
-  //         {
-  //           ij: [i, j],
-  //           camxy: [camera_offset.x,camera_offset.y],
-  //           x1: round(x),
-  //           y1: round(y),
-  //           x2: round(centerx),
-  //           y2: round(centery)
-  //         };
-  //     }
-  //   }
-  //   for (let x = x0; x < x1; x++) {
-  //     let [i, j] = tileRenderingOrder([
-  //       x + 0.5 + world_offset.x,
-  //       y + 0.5 - world_offset.y
-  //     ]);
-  //     let isVPoint = false;
-  //     let minij = [Infinity, Infinity];
-  //     let minChar = -1;
-  //     for(let index = 0; index < Entity.overworldEntities.length; index++){
-  //       if(Entity.overworldEntities[index].InWorld){
-  //         if(i - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].x + Entity.overworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.overworldEntities[index].y + Entity.overworldEntities[index].height/2){
-  //           if(Entity.overworldEntities[index].farValue[0] + Entity.overworldEntities[index].farValue[1] < minij[0] + minij[1]){
-  //             minij = Entity.overworldEntities[index].farValue;
-  //             minChar = index;
-  //           }
-  //           if(Entity.overworldEntities[index].farValue[0] === i && Entity.overworldEntities[index].farValue[1] === j){
-  //             isVPoint = true;
-  //           }
-  //         }
-  //       }
-  //     }
-  //     if(minChar >= 0 && !isVPoint){
-  //       let tmpChar = Entity.overworldEntities[minChar];
-  //       VPasses[tmpChar.ID].tiles.push(
-  //         {
-  //           ij: [i, j],
-  //           camxy: [camera_offset.x,camera_offset.y],
-  //           x1: 0,
-  //           y1: 0,
-  //           x2: 1,
-  //           y2: 1
-  //         }
-  //       );
-  //     }
-  //     else if(!isVPoint) {
-  //       VPasses[-1].tiles.push(
-  //         {
-  //           ij: [i, j],
-  //           camxy: [camera_offset.x,camera_offset.y],
-  //           x1: 0,
-  //           y1: 0,
-  //           x2: 1,
-  //           y2: 1
-  //         }
-  //       );
-  //     }
-  //     else if(minChar >= 0 && isVPoint) {
-  //       let tmpChar = Entity.overworldEntities[minChar];
-  //       VPasses[tmpChar.ID].lastTile = 
-  //         {
-  //           ij: [i, j],
-  //           camxy: [camera_offset.x,camera_offset.y],
-  //           x1: round(x),
-  //           y1: round(y),
-  //           x2: round(centerx),
-  //           y2: round(centery)
-  //         };
-  //     }
-  //   }
-  // }
-
-  // function compareFn(a, b) {
-  //   if (a.yValue < b.yValue) {
-  //     return -1;
-  //   } else if (a.yValue > b.yValue) {
-  //     return 1;
-  //   }
-  //   // a must be equal to b
-  //   return 0;
-  // }
-  // let tmpArr = [];
-  // for(let key in VPasses){
-  //   VPasses[key].farValue = [Infinity, Infinity];
-  //   if(VPasses[key].entity !== -1){
-  //     VPasses[key].farValue = Entity.overworldEntities[VPasses[key].entity].farValue;
-  //     VPasses[key].yValue = Entity.overworldEntities[VPasses[key].entity].farValue[0] + Entity.overworldEntities[VPasses[key].entity].farValue[1];
-  //   }
-  //   tmpArr.push(VPasses[key]);
-
-  // }
-  // tmpArr.sort(compareFn);
-  // let stack = [];
-  // for(let i = 0; i < tmpArr.length; i++){
-  //   stack.push(tmpArr[i]);
-  //   if(i + 1 < tmpArr.length && tmpArr[i].yValue === tmpArr[i + 1].yValue){
-  //     continue;
-  //   }
-  //   else{
-  //     for(let o = 0; o < stack.length; o++){
-  //       let tmp = stack[o];
-  //       for(let index = 0; index < tmp.tiles.length; index++){
-  //         let tmptiles = tmp.tiles[index];
-  //         drawTile(
-  //           tmptiles.ij,
-  //           tmptiles.camxy
-  //           , tmptiles.x1, tmptiles.y1, tmptiles.x2, tmptiles.y2, color(0, 0, 0, 0)); // even rows are offset horizontally
-  //       }
-  //     }
-  //     for(let o = 0; o < stack.length; o++){
-  //       if(!stack[o].lastTile && stack[o].entity !== -1 && Entity.overworldEntities[stack[o].entity].InWorld){
-  //         for(let p = 0; p < stack.length; p++){
-  //           if(o !== p && stack[p].lastTile && stack[p].lastTile.ij[0] === Entity.overworldEntities[stack[o].entity].farValue[0] && stack[p].lastTile.ij[1] === Entity.overworldEntities[stack[o].entity].farValue[1]){
-  //             stack[p].entities.push(stack[o].entity);
-  //           }
-  //         }
-  //       }
-  //     }
-  //     function stackSort(a, b) {
-  //       let chara = Entity.overworldEntities[a.entity];
-  //       let charb = Entity.overworldEntities[b.entity];
-  //       if (chara.baseHeight < charb.baseHeight) {
-  //         return -1;
-  //       } else if (chara.baseHeight > charb.baseHeight) {
-  //         return 1;
-  //       }
-  //       // a must be equal to b
-  //       return 0;
-  //     }
-  //     function entitySort(a, b) {
-  //       let chara = Entity.overworldEntities[a];
-  //       let charb = Entity.overworldEntities[b];
-  //       if (chara.x + chara.y < charb.x + charb.y) {
-  //         return -1;
-  //       } else if (chara.x + chara.y > charb.x + charb.y) {
-  //         return 1;
-  //       }
-  //       // a must be equal to b
-  //       return 0;
-  //     }
-
-  //     stack.sort(stackSort);
-  //     for(let o = 0; o < stack.length; o++){
-  //       let tmp = stack[o];
-  //       if(tmp.lastTile){
-  //         let tmpTile = tmp.lastTile;
-  //         drawTile(
-  //           tmpTile.ij,
-  //           tmpTile.camxy
-  //           , tmpTile.x1, tmpTile.y1, tmpTile.x2, tmpTile.y2, color(0, 0, 0, 0));
-  //         if(tmp.entities){
-  //           tmp.entities.sort(entitySort);
-  //           for(let p = 0; p < tmp.entities.length; p++){
-  //             Entity.overworldEntities[tmp.entities[p]].draw(world_offset, camera_offset);
-  //           }
-  //         }
-  //       }
-  //     }
-  //     stack = [];
-  //   }
-  // }
-  // if(mouseIsPressed){
-  //   console.log(tmpArr);
-  //   for(let o = 0; o < tmpArr.length; o++){
-  //     console.log(true && tmpArr[o].lastTile);
-  //   }
-  // }
 
 
   drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery);
@@ -1260,13 +923,10 @@ function drawTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c) {
   if (window.p3_drawTile) {
     window.p3_drawTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
   }
-  fill(0);
-  textAlign(CENTER, CENTER);
-  //text(c, 0, 0);
   pop();
 }
 
-function drawOverworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c) {
+function drawOverworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c, i) {
   let [screen_x, screen_y] = worldToScreen(
     [world_x, world_y],
     [camera_x, camera_y]
@@ -1276,13 +936,10 @@ function drawOverworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2,
   if (window.p3_drawOverworldTile) {
     window.p3_drawOverworldTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
   }
-  fill(0);
-  textAlign(CENTER, CENTER);
-  //text(c, 0, 0);
   pop();
 }
 
-function drawUnderworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c) {
+function drawUnderworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c, i) {
   let [screen_x, screen_y] = worldToScreen(
     [world_x, world_y],
     [camera_x, camera_y]
@@ -1292,8 +949,5 @@ function drawUnderworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2
   if (window.p3_drawUnderworldTile) {
     window.p3_drawUnderworldTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
   }
-  fill(0);
-  textAlign(CENTER, CENTER);
-  //text(c, 0, 0);
   pop();
 }
