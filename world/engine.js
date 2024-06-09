@@ -17,8 +17,9 @@ let camera_velocity;
 let level = 0;
 let keyTime = 0;
 let ShiftY = 500;
-let speed = 5;
-let caveLevel = -30;
+let speed = 15;
+//let speed = 5000;
+let caveLevel = -100;
 
 /////////////////////////////
 // Transforms between coordinate systems
@@ -30,13 +31,54 @@ function worldToScreen([world_x, world_y], [camera_x, camera_y]) {
   return [i + camera_x, j + camera_y];
 }
 
-function cameraToEntity(entity){
-  console.log(entity.baseHeight);
+function cameraToEntity(entity, amount){
+  //console.log(entity.baseHeight);
   let tmp = worldToScreen([entity.x, entity.y], [0, 0]);
+  let tmpBase;
+  let tmpShift;
+    if(entity.world === 0){
+      tmpBase = entity.drawHeight;
+      tmpShift = ShiftY - 500;
+    }
+    if(entity.world === 1){
+      tmpBase = entity.drawHeight;
+      tmpShift = ShiftY;
+    }
   let targetX = -tmp[0] - width/2;
-  let targetY = -tmp[1] + height/2 + entity.drawHeight;
-  camera_offset.x = camera_offset.x*0.9 + targetX*0.1;
-  camera_offset.y = camera_offset.y*0.9 + targetY*0.1;
+  let targetY = -tmp[1] + height/2 + tmpBase-tmpShift;
+  //console.log(camera_offset.y);
+  camera_offset.x = camera_offset.x*(1-amount) + targetX*amount;
+  camera_offset.y = camera_offset.y*(1-amount) + targetY*amount;
+}
+
+function cameraToEntityUsing(entity, amount, level){
+  //console.log(entity.baseHeight);
+  let tmp = worldToScreen([entity.x, entity.y], [0, 0]);
+  let tmpBase;
+  let tmpShift;
+  let tmpShiftY;
+  if(level === 0){
+    tmpShiftY = caveLevel;
+  }
+  if(level === 1){
+    tmpShiftY = 500;
+  }
+
+
+    if(entity.world === 0){
+      tmpBase = entity.drawHeight;
+      tmpShift = tmpShiftY - 500;
+    }
+    if(entity.world === 1){
+      tmpBase = entity.drawHeight;
+      tmpShift = tmpShiftY;
+    }
+    
+  let targetX = -tmp[0] - width/2;
+  let targetY = -tmp[1] + height/2 + tmpBase-tmpShift;
+  //console.log(camera_offset.y);
+  camera_offset.x = camera_offset.x*(1-amount) + targetX*amount;
+  camera_offset.y = camera_offset.y*(1-amount) + targetY*amount;
 }
 
 function worldToCamera([world_x, world_y], [camera_x, camera_y]) {
@@ -175,6 +217,8 @@ function setup() {
   createP("Arrow keys scroll. Press e to toggle world.").parent("container");
 
   rebuildWorld(input.value());
+
+  overworld.GenerateTileImages();
 }
 
 function rebuildWorld(key) {
@@ -184,7 +228,7 @@ function rebuildWorld(key) {
   tile_width_step_main = window.p3_tileWidth ? window.p3_tileWidth() : 32;
   tile_height_step_main = window.p3_tileHeight ? window.p3_tileHeight() : 14.5;
   tile_columns = Math.ceil(width / (tile_width_step_main * 2));
-  tile_rows = Math.ceil(height / (tile_height_step_main * 2) + 2);
+  tile_rows = Math.ceil(height / (tile_height_step_main * 2) + 10);
 }
 
 function mouseClicked() {
@@ -490,9 +534,9 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
     }
   }
   if(mouseIsPressed){
-    console.log(tmpArr);
+    //console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
-      console.log(true && tmpArr[o].lastTile);
+      //console.log(true && tmpArr[o].lastTile);
     }
   }
 }
@@ -786,16 +830,16 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
     }
   }
   if(mouseIsPressed){
-    console.log(tmpArr);
+    //console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
-      console.log(true && tmpArr[o].lastTile);
+      //console.log(true && tmpArr[o].lastTile);
     }
   }
 }
-
-
+let bjustMoved = true;
 
 function draw() {
+  let camera_delta = new p5.Vector(0, 0);
 
   if(keyIsDown(69) && keyTime <= 0){
     if(level === 0){
@@ -803,7 +847,7 @@ function draw() {
     } else {
       level = 0;
     }
-    keyTime = 30;
+    keyTime = 10;
   }
   keyTime--;
   if(ShiftY === 500 || ShiftY === caveLevel){
@@ -824,24 +868,29 @@ function draw() {
       player1.x -= 0.05;
       player1.y -= 0.05;
     }
+
     player2.x = player1.x;
     player2.y = player1.y;
-
     //move camera to player
-    if(level === 0){
-      cameraToEntity(player1);
-    } else {
-      cameraToEntity(player2);
+    if(bjustMoved){
+      bjustMoved = false;
+      //if(level === 0){
+      //  cameraToEntity(player1, 1);
+      //} else {
+      //   cameraToEntity(player2, 1);
+      //}
     }
-
   }
-
-  let camera_delta = new p5.Vector(0, 0);
-  camera_velocity.add(camera_delta);
+  if(level === 0){
+    cameraToEntityUsing(player1, 0.1, 1);
+  } else {
+     cameraToEntityUsing(player2, 0.1, 0);
+  }
+  //camera_velocity.add(camera_delta);
   if(ShiftY === 500 || ShiftY === caveLevel){
-  camera_offset.add(camera_velocity);
+  //ecamera_offset.add(camera_velocity);
   }
-  camera_velocity.mult(0.95); // cheap easing
+  camera_velocity.mult(0.95); // cheap easinge
   if (camera_velocity.mag() < 0.01) {
     camera_velocity.setMag(0);
   }

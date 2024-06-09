@@ -45,6 +45,42 @@ function simpleIsoTile(height, baseHeight, tw, th, c1, c2, c3){
     endShape(CLOSE);
 }
 
+function simpleIsoTileImage(height, baseHeight, tw, th, c1, c2, c3){
+  let out = createGraphics(tw*2, height + 2*th);
+  out.translate(tw, th + baseHeight + height);
+  out.strokeWeight(1);
+  out.fill(c1);
+  out.stroke(c1);
+  //top
+  out.beginShape();
+  out.vertex(-tw, 0 - height - baseHeight);
+  out.vertex(0, th - height - baseHeight);
+  out.vertex(tw, 0 - height - baseHeight);
+  out.vertex(0, -th - height - baseHeight);
+  out.endShape(CLOSE);
+  out.fill(c2);
+  out.stroke(c2);
+  //left
+  out.beginShape();
+  out.vertex(-tw, 0 - height - baseHeight);
+  out.vertex(-tw, 0 - baseHeight);
+  out.vertex(0, th - baseHeight);
+  out.vertex(0, th - height - baseHeight);
+  out.endShape(CLOSE);
+  out.fill(c3);
+  out.stroke(c3);
+  //right
+  out.beginShape();
+  out.vertex(tw, 0 - height - baseHeight);
+  out.vertex(tw, 0 - baseHeight);
+  out.vertex(0, th - baseHeight);
+  out.vertex(0, th - height - baseHeight);
+  out.endShape(CLOSE);
+  return out;
+}
+
+
+
 function p3_preload() {}
 
 function p3_setup() {}
@@ -87,7 +123,7 @@ function p3_drawOverworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
 
   push();
 
-  if(screen_y < 400 + 16*4){
+  if(screen_y < 400 + 16*8){
     stroke(c);
     overworld.drawTile(i, j, -ShiftY + 500);
   }
