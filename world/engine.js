@@ -224,7 +224,6 @@ function setup() {
     rebuildWorld(input.value());
   });
 
-  createP("Arrow keys scroll. Press e to toggle world.").parent("container");
 
   rebuildWorld(input.value());
 
