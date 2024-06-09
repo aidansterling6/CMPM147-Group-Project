@@ -257,6 +257,10 @@ function rebuildWorld(key) {
 }
 
 function mouseClicked() {
+  overworld_ambience.play();
+  overworld_ambience.setLoop(true);
+  underworld_ambience.play();
+  underworld_ambience.setLoop(true);
   let world_pos = screenToWorld(
     [0 - mouseX, mouseY],
     [camera_offset.x, camera_offset.y]
