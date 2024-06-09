@@ -26,7 +26,7 @@ class overworld{
 
         let height = overworld.GetHeight(i, j);
 
-        let base = (noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346))*0.25;
+        let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
 
         let c1 = color(0);
         let c2 = color(0);
@@ -34,9 +34,9 @@ class overworld{
         
         if(height > 0.5){
             if(base > 0.4){
-                c1 = color(19,109,21);
-                c2 = color(19,109,21);
-                c3 = color(19,109,21);
+                c1 = color(246,215,176);
+                c2 = color(246,215,176);
+                c3 = color(246,215,176);
             } else{
                 c1 = color(150);
                 c2 = color(150*0.8);
