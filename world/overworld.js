@@ -91,7 +91,7 @@ class overworld{
         if(height < 0.5){
             height = 0.49;
         }
-        height -= 0.5;
+        height -= 0.49;
         return height * overworld.multiplier;
     }
     static drawTile(i, j, WorldHeight){
