@@ -19,6 +19,9 @@ let keyTime = 0;
 let ShiftY = 500;
 let speed = 15;
 //let speed = 5000;
+
+let ImageStash;
+
 let caveLevel = -100;
 let entityHandlers = {};
 
@@ -128,7 +131,8 @@ class Animal{
         Animal.currentID++;
         this.HandlerID = "" + this.type + ", " + this.ID;
         entityHandlers[this.HandlerID] = 5;
-        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, 0, color(255, 0, 255), "mic", null, this.HandlerID);
+        let tmpSize = 20;
+        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, 0, color(255, 0, 255), "mic", {img: ImageStash.crab, x:-tmpSize*0.5, y:-tmpSize, w:tmpSize, h:tmpSize}, this.HandlerID);
         Animal.Animals.push(this);
     }
     static update(){
@@ -253,13 +257,17 @@ function preload() {
     window.p3_preload();
   }
 
+  ImageStash = {
+    crab: loadImage("./images/crab.png")
+  };
+
   // Audio preloads
-  //soundFormats('wav', 'mp3');
-//   overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
-//   underworld_ambience = loadSound('../audio-assets/478812__ianstargem__ambience-4 (1).wav');
-//   bird_sfx = loadSound('../audio-assets/361470__jofae__crow-caw.mp3');
-//   bones_sfx = loadSound('../audio-assets/202102__spookymodem__rattling-bones.wav');
-//   osc = new p5.Oscillator('sine');
+  soundFormats('wav', 'mp3');
+  overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
+  underworld_ambience = loadSound('../audio-assets/478812__ianstargem__ambience-4 (1).wav');
+  bird_sfx = loadSound('../audio-assets/361470__jofae__crow-caw.mp3');
+  bones_sfx = loadSound('../audio-assets/202102__spookymodem__rattling-bones.wav');
+  osc = new p5.Oscillator('sine');
 }
 function removeCircular(obj) {
     if(obj){
@@ -317,20 +325,20 @@ function setup() {
   GenerateUnderworldTileImages();
 
 //   // Audio Setup
-//   cave_reverb = new p5.Reverb();
-//   cave_reverb.process(bones_sfx);
+  cave_reverb = new p5.Reverb();
+  cave_reverb.process(bones_sfx);
 
-//   osc.freq(0.05);
-//   osc.start();
-//   osc.disconnect();
+  osc.freq(0.05);
+  osc.start();
+  osc.disconnect();
 
-//   overworld_ambience.play();
-//   overworld_ambience.setLoop(true);
-//   overworld_ambience.setVolume(0);
+  overworld_ambience.play();
+  overworld_ambience.setLoop(true);
+  overworld_ambience.setVolume(0);
 
-//   underworld_ambience.play();
-//   underworld_ambience.setLoop(true);
-//   underworld_ambience.setVolume(0);
+  underworld_ambience.play();
+  underworld_ambience.setLoop(true);
+  underworld_ambience.setVolume(0);
 }
 
 function rebuildWorld(key) {
@@ -1044,25 +1052,25 @@ function draw() {
 
     Animal.update();
 
-//   let overworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.0, 0.8);
-//   let underworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.8, 0.0);
+  let overworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.0, 0.8);
+  let underworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.8, 0.0);
 
-//   let bird_rate = random(0, 1) * random(0, 1);
-//   if (bird_rate > 0.85 && !bird_sfx.isPlaying()) {
-//     //console.log("caw");
-//     bird_sfx.setVolume(min(overworld_ambience_volume, random(0.3, 0.7)));
-//     bird_sfx.play();
-//   }
+  let bird_rate = random(0, 1) * random(0, 1);
+  if (bird_rate > 0.85 && !bird_sfx.isPlaying()) {
+    //console.log("caw");
+    bird_sfx.setVolume(min(overworld_ambience_volume, random(0.3, 0.7)));
+    bird_sfx.play();
+  }
 
-//   let bone_rate = noise(0.07 * frameCount);
-//   if (bone_rate > 0.75 && !bones_sfx.isPlaying()) {
-//     //console.log("rattle");
-//     bones_sfx.setVolume(min(underworld_ambience_volume, random(0.3, 0.7)));
-//     bones_sfx.play();
-//   }
+  let bone_rate = noise(0.07 * frameCount);
+  if (bone_rate > 0.75 && !bones_sfx.isPlaying()) {
+    //console.log("rattle");
+    bones_sfx.setVolume(min(underworld_ambience_volume, random(0.3, 0.7)));
+    bones_sfx.play();
+  }
 
-//   overworld_ambience.setVolume(overworld_ambience_volume);
-//   underworld_ambience.setVolume(underworld_ambience_volume);
+  overworld_ambience.setVolume(overworld_ambience_volume);
+  underworld_ambience.setVolume(underworld_ambience_volume);
 
 
 
