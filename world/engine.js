@@ -21,6 +21,7 @@ let speed = 15;
 //let speed = 5000;
 
 let ImageStash;
+let CrabCount = 0;
 
 let caveLevel = -100;
 let entityHandlers = {};
@@ -132,7 +133,7 @@ class Animal{
         this.HandlerID = "" + this.type + ", " + this.ID;
         entityHandlers[this.HandlerID] = 5;
         let tmpSize = 20;
-        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, 0, color(255, 0, 255), "mic", {img: ImageStash.crab, x:-tmpSize*0.5, y:-tmpSize, w:tmpSize, h:tmpSize}, this.HandlerID);
+        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, 0, color(255, 0, 255), type, {img: ImageStash.crab, x:-tmpSize*0.5, y:-tmpSize, w:tmpSize, h:tmpSize}, this.HandlerID);
         Animal.Animals.push(this);
     }
     static update(){
@@ -220,6 +221,10 @@ class Entity{
           let tmpBase = this.drawHeight;
           let tmpShift = ShiftY - 500;
           if(screen_y < 400 + 16*8){
+            if(this.type === "crab"){
+              console.log(this.type);
+              CrabCount++;
+            }
           if(this.image){
             image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
           }
@@ -233,6 +238,10 @@ class Entity{
             let tmpBase = this.drawHeight;
             let tmpShift = ShiftY;
             if(screen_y < 400 + 16*8){
+              // console.log(this.type);
+              if(this.type === "crab"){
+                CrabCount++;
+              }
             if(this.image){
               image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
             }
@@ -249,7 +258,7 @@ let player1;
 let player2;
 
 // Audio Globals
-let overworld_ambience, underworld_ambience, osc, bird_sfx, bones_sfx;
+let crabRave, overworld_ambience, underworld_ambience, osc, bird_sfx, bones_sfx;
 let cave_reverb;
 
 function preload() {
@@ -263,6 +272,7 @@ function preload() {
 
   // Audio preloads
   soundFormats('wav', 'mp3');
+  crabRave = loadSound('../audio-assets/crab.mp3');
   overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
   underworld_ambience = loadSound('../audio-assets/478812__ianstargem__ambience-4 (1).wav');
   bird_sfx = loadSound('../audio-assets/361470__jofae__crow-caw.mp3');
@@ -332,9 +342,14 @@ function setup() {
   osc.start();
   osc.disconnect();
 
+  crabRave.play();
+  crabRave.setLoop(true);
+  crabRave.setVolume(0);
+
   overworld_ambience.play();
   overworld_ambience.setLoop(true);
   overworld_ambience.setVolume(0);
+
 
   underworld_ambience.play();
   underworld_ambience.setLoop(true);
@@ -1070,9 +1085,11 @@ function draw() {
   }
 
   overworld_ambience.setVolume(overworld_ambience_volume);
+  crabRave.setVolume(overworld_ambience_volume * (CrabCount/100));
+  console.log(CrabCount);
   underworld_ambience.setVolume(underworld_ambience_volume);
 
-
+  CrabCount = 0;
 
   //let e = new Entity(Math.random(), Math.random(), 1/3, 1/3, 20, 0, color(0, 0, 255), "dynamic");
 
@@ -1221,7 +1238,6 @@ function draw() {
     window.p3_drawAfter();
   }
   //drawPalmTree(300, 300);
-
 }
 
 // Display a discription of the tile at world_x, world_y.
