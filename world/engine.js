@@ -241,6 +241,7 @@ function setup() {
   rebuildWorld(input.value());
 
   overworld.GenerateTileImages();
+  underworld.GenerateTileImages();
 
   // Audio Setup
   cave_reverb = new p5.Reverb();

@@ -73,7 +73,8 @@ function simpleIsoTile(
   }
 }
 
-function simpleIsoTileImage(height, baseHeight, tw, th, c1, c2, c3) {
+function simpleIsoTileImage(height, baseHeight, tw, th, c1, c2, c3, ore = false,
+  ore_color = "green") {
   let out = createGraphics(tw * 2, height + 2 * th);
   out.translate(tw, th + baseHeight + height);
   out.strokeWeight(1);
@@ -104,6 +105,24 @@ function simpleIsoTileImage(height, baseHeight, tw, th, c1, c2, c3) {
   out.vertex(0, th - baseHeight);
   out.vertex(0, th - height - baseHeight);
   out.endShape(CLOSE);
+  if (ore) {
+    let s = 0.1; // scaling factor
+    let noiseScale = 120; // adjust this value to control the noise granularity
+    let numShapes = 5; // number of shapes to draw
+    let offsetX2 = 15;
+    for (let i = 0; i < numShapes; i++) {
+      out.fill(ore_color);
+      let offsetX = noise(i * noiseScale) * tw * 2 - tw; // generate x position using noise
+      let offsetY = noise(i * noiseScale + 100) * th * 2 - th; // generate y position using noise
+
+      out.beginShape();
+      out.vertex(-tw * s + offsetX - offsetX2, 0 + offsetY - height - baseHeight);
+      out.vertex(0 + offsetX - offsetX2, th * s + offsetY - height - baseHeight);
+      out.vertex(tw * s + offsetX - offsetX2, 0 + offsetY - height - baseHeight);
+      out.vertex(0 + offsetX - offsetX2, -th * s + offsetY - height - baseHeight);
+      out.endShape(CLOSE);
+    }
+  }
   return out;
 }
 
