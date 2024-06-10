@@ -164,7 +164,7 @@ class Entity{
           let tmpShift = ShiftY - 500;
           if(screen_y < 400 + 16*8){
           if(this.image){
-            //image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
+            image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
           }
           else{
             simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
@@ -177,7 +177,7 @@ class Entity{
             let tmpShift = ShiftY;
             if(screen_y < 400 + 16*8){
             if(this.image){
-              //image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
+              image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
             }
             else{
               simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
