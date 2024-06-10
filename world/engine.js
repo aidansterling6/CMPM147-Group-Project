@@ -117,7 +117,7 @@ class Animal{
     static currentID = 0;
     static Animals = [];
     constructor(type, x, y){
-        console.log("animal");
+        //console.log("animal");
         this.type = type;
         this.x = x;
         this.y = y;
@@ -160,7 +160,7 @@ class Animal{
                 animal.entity.x = animal.x;
                 animal.entity.y = animal.y;
             }
-            console.log("test");
+            //console.log("test");
         }
     }
 }
