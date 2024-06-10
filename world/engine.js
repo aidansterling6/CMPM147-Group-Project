@@ -21,7 +21,8 @@ let speed = 15;
 //let speed = 5000;
 
 let ImageStash;
-let CrabCount = 0;
+let OverworldCrabCount = 0;
+let UnderworldCrabCount = 0;
 
 let caveLevel = -100;
 let entityHandlers = {};
@@ -120,9 +121,10 @@ function worldOffsetToCamera([world_x, world_y]) {
 class Animal{
     static currentID = 0;
     static Animals = [];
-    constructor(type, x, y){
+    constructor(type, x, y, level){
         //console.log("animal");
         this.type = type;
+        this.level = level;
         this.x = x;
         this.y = y;
         this.tx = x;
@@ -133,46 +135,121 @@ class Animal{
         this.HandlerID = "" + this.type + ", " + this.ID;
         entityHandlers[this.HandlerID] = 5;
         let tmpSize = 20;
-        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, 0, color(255, 0, 255), type, {img: ImageStash.crab, x:-tmpSize*0.5, y:-tmpSize, w:tmpSize, h:tmpSize}, this.HandlerID);
+        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, level, color(255, 0, 255), type, {img: ImageStash.crab, x:-tmpSize*0.5, y:-tmpSize, w:tmpSize, h:tmpSize}, this.HandlerID);
         Animal.Animals.push(this);
+    }
+    static Count(camera_offset){
+
+      for(let key in Animal.Animals){
+        let animal = Animal.Animals[key];
+        let [screen_x, screen_y] = animal.entity.getScreenPosition(animal.entity.farValue, camera_offset);
+        //console.log(screen_y);
+        if(animal.level === 0){
+          if(screen_x < 0 + 16*3 &&  screen_x > -800 - 16*3 && screen_y < 400 + 16*3 && screen_y > 0 - 16*3){
+            if(animal.type === "crab"){
+              OverworldCrabCount++;
+            }
+        }
+        }
+  
+          if(animal.level === 1){
+            console.log(screen_y);
+            if(screen_x < 0 + 16*3 &&  screen_x > -800 - 16*3 && screen_y < 400 + 16*3 + 100 && screen_y > 0 - 16*3 + 100){
+              if(animal.type === "crab"){
+                UnderworldCrabCount++;
+              }
+            }
+          }
+  
+      }
+  
+  
     }
     static update(){
         for(let i in Animal.Animals){
             let animal = Animal.Animals[i];
             if(animal.type === "crab"){
-                if(animal.time <= 0){
+              if(animal.level === 0){
+                  if(animal.time <= 0){
+                    let tmpDist = dist(animal.x, animal.y, animal.tx, animal.ty);
+                    if(tmpDist > 0.8){
+                      animal.time = 30;
+                      animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
+                      animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
+                      continue;
+                    }
+                    let flag = false;
+                    for(let d = 3; d < 15; d += 2){
+                      for(let i = 0; i < 5; i++){
+                          animal.tx = round(animal.x + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
+                          animal.ty = round(animal.y + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
+                          if(overworld.GetHeight(round(animal.tx), round(animal.ty)) > 0.5){
+                              animal.time = 30;
+                              flag = true;
+                              break;
+                          }
+                      }
+                      if(flag){
+                        break;
+                      }
+                    }
+                  }
+                  else{
+                  animal.time--;
                   let tmpDist = dist(animal.x, animal.y, animal.tx, animal.ty);
-                  if(tmpDist > 0.8){
-                    animal.time = 30;
-                    animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
-                    animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
-                    continue;
+                  if(tmpDist !== 0 && tmpDist > 0.12){
+                      animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
+                      animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
                   }
-                  let flag = false;
-                  for(let d = 3; d < 15; d += 2){
-                    for(let i = 0; i < 5; i++){
-                        animal.tx = round(animal.x + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
-                        animal.ty = round(animal.y + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
-                        if(overworld.GetHeight(round(animal.tx), round(animal.ty)) > 0.5){
-                            animal.time = 30;
-                            flag = true;
-                            break;
-                        }
-                    }
-                    if(flag){
-                      break;
-                    }
-                  }
-                }
-                else{
-                animal.time--;
+              }
+            }
+            if(animal.level === 1){
+              if(animal.time <= 0){
                 let tmpDist = dist(animal.x, animal.y, animal.tx, animal.ty);
-                if(tmpDist !== 0 && tmpDist > 0.12){
-                    animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
-                    animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
+                if(tmpDist > 0.8){
+                  animal.time = 30;
+                  animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
+                  animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
+                  continue;
                 }
-            }
-            }
+                let flag = false;
+                let jumps = 5;
+                for(let d = 3; d < 15; d += 2){
+                  for(let i = 0; i < 5; i++){
+                      animal.tx = round(animal.x + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
+                      animal.ty = round(animal.y + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
+                      let height = underworld.GetHeight(round(animal.tx), round(animal.ty));
+                      let ore = XXH.h32("tile:" + [round(animal.tx), round(animal.ty)], worldSeed) % 4 == 0 && height == 0.1;
+                      if(ore){
+                        animal.time = 30;
+                          flag = true;
+                          break;
+                      }
+                     else {
+                          if(jumps > 0){
+                            jumps--;
+                          }
+                          else{
+                          animal.time = 30;
+                          flag = true;
+                          break;
+                          }
+                      }
+                  }
+                  if(flag){
+                    break;
+                  }
+                }
+              }
+              else{
+              animal.time--;
+              let tmpDist = dist(animal.x, animal.y, animal.tx, animal.ty);
+              if(tmpDist !== 0 && tmpDist > 0.12){
+                  animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
+                  animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
+              }
+          }
+        }
 
 
             if(animal.entity){
@@ -180,6 +257,7 @@ class Animal{
                 animal.entity.y = animal.y;
             }
             //console.log("test");
+          }
         }
     }
 }
@@ -237,7 +315,7 @@ class Entity{
           if(screen_y < 400 + 16*8){
             if(this.type === "crab"){
               console.log(this.type);
-              CrabCount++;
+              //OverworldCrabCount++;
             }
           if(this.image){
             image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
@@ -254,7 +332,7 @@ class Entity{
             if(screen_y < 400 + 16*8){
               // console.log(this.type);
               if(this.type === "crab"){
-                CrabCount++;
+                //UnderworldCrabCount++;
               }
             if(this.image){
               image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
@@ -272,7 +350,7 @@ let player1;
 let player2;
 
 // Audio Globals
-let crabRave, overworld_ambience, underworld_ambience, osc, bird_sfx, bones_sfx;
+let crabRave, crabRaveCave, overworld_ambience, underworld_ambience, osc, bird_sfx, bones_sfx;
 let cave_reverb;
 
 function preload() {
@@ -287,6 +365,7 @@ function preload() {
   // Audio preloads
   soundFormats('wav', 'mp3');
   crabRave = loadSound('../audio-assets/crab.mp3');
+  crabRaveCave = loadSound('../audio-assets/crabCave.mp3');
   overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
   underworld_ambience = loadSound('../audio-assets/478812__ianstargem__ambience-4 (1).wav');
   bird_sfx = loadSound('../audio-assets/361470__jofae__crow-caw.mp3');
@@ -360,6 +439,10 @@ function setup() {
   crabRave.setLoop(true);
   crabRave.setVolume(0);
 
+  crabRaveCave.play();
+  crabRaveCave.setLoop(true);
+  crabRaveCave.setVolume(0);
+
   overworld_ambience.play();
   overworld_ambience.setLoop(true);
   overworld_ambience.setVolume(0);
@@ -389,9 +472,19 @@ function mouseClicked() {
     [0 - mouseX, mouseY],
     [camera_offset.x, camera_offset.y]
   );
+  
 
   if (window.p3_tileClicked) {
-    window.p3_tileClicked(world_pos[0], world_pos[1]);
+    if(ShiftY === caveLevel){
+      let tmpPos = screenToWorld(
+        [0 - mouseX, mouseY + 120],
+        [camera_offset.x, camera_offset.y]
+      );
+      window.p3_tileClicked(tmpPos[0], tmpPos[1]);
+    }
+    else{
+      window.p3_tileClicked(world_pos[0], world_pos[1]);
+    }
   }
   return false;
 }
@@ -780,6 +873,9 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
   }
 }
 function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
+
+
+
   let VPasses = {};
   VPasses[-1] = {
     yValue: Infinity,
@@ -1068,7 +1164,6 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
       stack = [];
     }
   }
-  
 }
 let bjustMoved = true;
 let disable = false;
@@ -1099,11 +1194,11 @@ function draw() {
   }
 
   overworld_ambience.setVolume(overworld_ambience_volume);
-  crabRave.setVolume(overworld_ambience_volume * (CrabCount/100));
-  console.log(CrabCount);
+  crabRave.setVolume(overworld_ambience_volume * (OverworldCrabCount/100));
+  console.log(OverworldCrabCount);
   underworld_ambience.setVolume(underworld_ambience_volume);
+  crabRaveCave.setVolume(underworld_ambience_volume * 10 * (UnderworldCrabCount/100));
 
-  CrabCount = 0;
 
   //let e = new Entity(Math.random(), Math.random(), 1/3, 1/3, 20, 0, color(0, 0, 255), "dynamic");
 
@@ -1123,21 +1218,37 @@ function draw() {
   keyTime--;
   if(ShiftY === 500 || ShiftY === caveLevel){
     // Keyboard controls!
-     if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
-      player1.x += 0.05;
-      player1.y -= 0.05;
+    //  if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+    //   player1.x += 0.05;
+    //   player1.y -= 0.05;
+    //  }
+    //  if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
+    // player1.x -= 0.05;
+    //   player1.y += 0.05;
+    //  }
+    //  if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
+    // player1.x += 0.05;
+    //   player1.y += 0.05;
+    //  }
+    //  if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
+    //   player1.x -= 0.05;
+    //   player1.y -= 0.05;
+    // }
+    if (keyIsDown(LEFT_ARROW) || keyIsDown(65)) {
+      player1.x += 0.07;
+      player1.y -= 0.07;
      }
      if (keyIsDown(RIGHT_ARROW) || keyIsDown(68)) {
-    player1.x -= 0.05;
-      player1.y += 0.05;
+    player1.x -= 0.07;
+      player1.y += 0.07;
      }
      if (keyIsDown(DOWN_ARROW) || keyIsDown(83)) {
-    player1.x += 0.05;
-      player1.y += 0.05;
+    player1.x += 0.07;
+      player1.y += 0.07;
      }
      if (keyIsDown(UP_ARROW) || keyIsDown(87)) {
-      player1.x -= 0.05;
-      player1.y -= 0.05;
+      player1.x -= 0.07;
+      player1.y -= 0.07;
     }
 
     player2.x = player1.x;
@@ -1192,7 +1303,9 @@ function draw() {
   drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery);
   drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery);
 
-
+  OverworldCrabCount = 0;
+  UnderworldCrabCount = 0;
+  Animal.Count(camera_offset);
 
 
 
@@ -1242,11 +1355,16 @@ function draw() {
 
 
 
-
-
-
-
-  describeMouseTile(world_pos, [camera_offset.x, camera_offset.y]);
+  if(ShiftY === caveLevel){
+    let tmpPos = screenToWorld(
+      [0 - mouseX, mouseY + 120],
+      [camera_offset.x, camera_offset.y]
+    );
+    describeMouseTile(tmpPos, [camera_offset.x, camera_offset.y]);
+  }
+  else{
+    describeMouseTile(world_pos, [camera_offset.x, camera_offset.y]);
+  }
 
   if (window.p3_drawAfter) {
     window.p3_drawAfter();
@@ -1256,6 +1374,9 @@ function draw() {
 
 // Display a discription of the tile at world_x, world_y.
 function describeMouseTile([world_x, world_y], [camera_x, camera_y]) {
+  if(ShiftY === caveLevel){
+    camera_y += 100;
+  }
   let [screen_x, screen_y] = worldToScreen(
     [world_x, world_y],
     [camera_x, camera_y]
