@@ -20,6 +20,7 @@ let ShiftY = 500;
 let speed = 15;
 //let speed = 5000;
 let caveLevel = -100;
+let entityHandlers = {};
 
 /////////////////////////////
 // Transforms between coordinate systems
@@ -118,9 +119,10 @@ class Entity{
   static underworldEntities = [];
   static entities = [];
   static CurrentID = 0;
-  constructor(x, y, width, height, tileHeight, world, Color, type, image){
+  constructor(x, y, width, height, tileHeight, world, Color, type, image, HandlerID){
       this.ID = Entity.CurrentID;
       Entity.CurrentID++;
+      this.HandlerID = HandlerID;
       this.type = type;
       this.image = image;
       this.x = x;
@@ -160,6 +162,7 @@ class Entity{
           if(this.world === 0){
           let tmpBase = this.drawHeight;
           let tmpShift = ShiftY - 500;
+          if(screen_y < 400 + 16*8){
           if(this.image){
             image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
           }
@@ -167,16 +170,19 @@ class Entity{
             simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
           }
         }
+        }
 
           if(this.world === 1){
             let tmpBase = this.drawHeight;
             let tmpShift = ShiftY;
+            if(screen_y < 400 + 16*8){
             if(this.image){
               image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
             }
             else{
               simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
             }
+          }
           }
           pop();
   }
@@ -290,14 +296,21 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
         x + world_offset.x,
         y - world_offset.y
       ]);
-      let rand = XXH.h32("tile: " + i + ", " + j, worldSeed) % 100;
-      let randx = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
-      let randy = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
-      let tmpHeight = overworld.GetHeight(i, j);
-      let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
-      if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
-        let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
-        let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize});
+      if(!entityHandlers[i + ", " + j]){
+        let rand = XXH.h32("tile: " + i + ", " + j, worldSeed) % 100;
+        let randx = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+        let randy = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+        let tmpHeight = overworld.GetHeight(i, j);
+        let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
+        if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
+          let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
+          entityHandlers[i + ", " + j] = 5;
+          let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize}, i + ", " + j);
+
+        }
+      }
+      else{
+        entityHandlers[i + ", " + j] = 5;
       }
     }
     for (let x = x0; x < x1; x++) {
@@ -305,14 +318,20 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
         x + 0.5 + world_offset.x,
         y + 0.5 - world_offset.y
       ]);
-      let rand = XXH.h32("tile: " + i + ", " + j, worldSeed) % 100;
-      let randx = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
-      let randy = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
-      let tmpHeight = overworld.GetHeight(i, j);
-      let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
-      if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
-        let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
-        let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize});
+      if(!entityHandlers[i + ", " + j]){
+        let rand = XXH.h32("tile: " + i + ", " + j, worldSeed) % 100;
+        let randx = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+        let randy = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+        let tmpHeight = overworld.GetHeight(i, j);
+        let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
+        if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
+          let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
+          entityHandlers[i + ", " + j] = 5;
+          let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize}, i + ", " + j);
+        }
+      }
+      else{
+        entityHandlers[i + ", " + j] = 5;
       }
     }
   }
@@ -609,6 +628,8 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
     }
   }
   if(mouseIsPressed){
+    console.log(Entity.overworldEntities.length);
+    console.log(overworld.PalmTrees.length);
     //console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
       //console.log(true && tmpArr[o].lastTile);
@@ -1029,14 +1050,20 @@ function draw() {
 
 
 
-
+  for(let key in entityHandlers){
+    entityHandlers[key]--;
+    if(entityHandlers[key] <= 0){
+      delete entityHandlers[key];
+    }
+  }
 
 
 
 
   for(let i = 0; i < Entity.overworldEntities.length; i++){
-    if(Entity.overworldEntities[i].type === "dynamic"){
+    if(Entity.overworldEntities[i].type === "dynamic" && !entityHandlers[Entity.overworldEntities[i].HandlerID]){
       Entity.overworldEntities.splice(i, 1);
+      console.log("splice");
       i--;
     }
     if(i < 0){
@@ -1044,8 +1071,9 @@ function draw() {
     }
   }
   for(let i = 0; i < Entity.underworldEntities.length; i++){
-    if(Entity.underworldEntities[i].type === "dynamic"){
+    if(Entity.underworldEntities[i].type === "dynamic" && !entityHandlers[Entity.overworldEntities[i].HandlerID]){
       Entity.underworldEntities.splice(i, 1);
+      console.log("splice");
       i--;
     }
     if(i < 0){
