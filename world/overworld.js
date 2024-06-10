@@ -91,23 +91,8 @@ class overworld{
         if(height < 0.5){
             height = 0.49;
         }
-        height -= 0.4;
+        height -= 0.5;
         return height * overworld.multiplier;
-    }
-    static GenerateTileImages(){
-        // overworld.BaseTile = {w:tw*2, h: 50 + 2*th, img: simpleIsoTileImage(50, 0, tw, th, color(0, 0), color(100*0.8), color(100*0.9))};
-
-        // for(let i = 0; i < 100; i++){
-        //     overworld.SandTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(246,215,176), color(246*0.8,215*0.8,176*0.8), color(246*0.9,215*0.9,176*0.9))});
-        // }
-        // for(let i = 0; i < 100; i++){
-        //     overworld.StoneTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9))});
-        // }
-        // overworld.WaterTile = {w:tw*2, h: overworld.GetDrawHeight(0.4) + 2*th, img: simpleIsoTileImage(overworld.GetDrawHeight(0.4), 0, tw, th, color(0, 0, 255), color(0, 0, 255), color(0, 0, 255))};
-
-        // for(let i = 0; i < 30; i++){
-        //     overworld.PalmTrees.push(drawPalmTree());
-        // }
     }
     static drawTile(i, j, WorldHeight){
         //stroke(75);

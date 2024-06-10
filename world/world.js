@@ -152,7 +152,7 @@ let clicks = {};
 function p3_tileClicked(i, j) {
   let key = [i, j];
   clicks[key] = 1 + (clicks[key] | 0);
-  let tmp = new Animal("crab", i + 1, j + 1);
+  let tmp = new Animal("crab", i, j);
   console.log("animal2");
 }
 
@@ -216,6 +216,7 @@ function p3_drawUnderworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
 function p3_drawSelectedTile(i, j) {
   noFill();
   stroke(0, 255, 0, 128);
+  translate(0, -overworld.GetDrawHeight(overworld.GetHeight(i, j)));
 
   beginShape();
   vertex(-tw, 0);

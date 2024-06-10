@@ -42,21 +42,6 @@ class underworld {
 //   static GreenOreTiles = [];
 //   static RedOreTiles = [];
 //   static BlueOreTiles = [];
-  static GenerateTileImages() {
-    // for(let i = 0; i < 100; i++){
-    //     underworld.StoneTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9))});
-    // }
-    // for(let i = 0; i < 100; i++){
-    //     underworld.GreenOreTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9), true, "green")});
-    // }
-    // for(let i = 0; i < 100; i++){
-    //     underworld.RedOreTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9), true, "red")});
-    // }
-    // for(let i = 0; i < 100; i++){
-    //     underworld.BlueOreTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9), true, "blue")});
-    // }
-    //overworld.BaseTile = {w:tw*2, h: 50 + 2*th, img: simpleIsoTileImage(50, 0, tw, th, color(0, 0), color(100*0.8), color(100*0.9))};
-  }
   static GetHeight(i, j) {
     let base =
       (noise(i / 7 + 3453, j / 7 - 56433) +
