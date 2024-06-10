@@ -1,12 +1,32 @@
 /* CSS files add styling rules to your content */
 
 body {
-    font-family: helvetica, arial, sans-serif;
-    margin: 2em;
-  }
-  
-  h1 {
-    font-style: italic;
-    color: #373fff;
-  }
-  
+  font-family: helvetica, arial, sans-serif;
+  margin: 2em;
+  background-color: rgb(105, 97, 97);
+}
+
+h1 {
+  font-style: italic;
+  color: #373fff;
+}
+
+.game {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.Title {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.almendra-bold {
+  font-family: "Almendra", serif;
+  font-weight: 700;
+  font-style: normal;
+  font-size: xx-large;
+}
