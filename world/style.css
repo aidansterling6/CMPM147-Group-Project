@@ -3,7 +3,7 @@
 body {
   font-family: helvetica, arial, sans-serif;
   margin: 2em;
-  background-color: rgb(105, 97, 97);
+  background-color: #151515
 }
 
 h1 {
@@ -29,4 +29,14 @@ h1 {
   font-weight: 700;
   font-style: normal;
   font-size: xx-large;
+}
+
+.keys {
+  display: flex;
+  align-items: center;
+}
+
+.keys img {
+  width: 30px;
+  margin-right: 5px; 
 }

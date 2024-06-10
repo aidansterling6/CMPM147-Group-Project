@@ -12,6 +12,21 @@
       href="https://fonts.googleapis.com/css2?family=Almendra:ital,wght@0,400;0,700;1,400;1,700&display=swap"
       rel="stylesheet"
     />
+    <!-- Two backgrounds so when the screen size is different it still connects in color -->
+    <style>
+      body { 
+        background-image: url("/image-assets/Caves Below Background.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        color: white;
+      }
+
+      .game p {
+        text-transform: uppercase;
+      }
+
+    </style>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.2.0/p5.min.js"
       integrity="sha512-b/htz6gIyFi3dwSoZ0Uv3cuv3Ony7EeKkacgrcVg8CMzu90n777qveu0PBcbZUA7TzyENGtU+qZRuFAkfqgyoQ=="
@@ -28,12 +43,22 @@
     <div class="Title"><p class="almendra-bold">The Caves Beneath</p></div>
     <div class="game">
       <div id="container"></div>
-      <p>
-        <strong>WASD or arrow keys to move</strong>
-      </p>
-      <p>
-        <strong>Press E to switch between worlds</strong>
-      </p>
+      <div class="keys">
+        <img src="/image-assets/W Key.png" alt="W Key" />
+        <img src="/image-assets/A Key.png" alt="A Key" />
+        <img src="/image-assets/S Key.png" alt="S Key" />
+        <img src="/image-assets/D Key.png" alt="D Key" />
+        <p>/ </p>
+        <img src="/image-assets/Up Arrow Key.png" alt="UP Key" />
+        <img src="/image-assets/Down Arrow Key.png" alt="DOWN Key" />
+        <img src="/image-assets/Left Arrow Key.png" alt="LEFT Key" />
+        <img src="/image-assets/Right Arrow Key.png" alt="RIGHT KEY Key" />
+        <p>: TO MOVE</p>
+      </div>
+      <div class="keys">
+        <img src="/image-assets/E Key.png" alt="E Key" />
+        <p>: TO SWITCH WORLDS</p>
+      </div>
     </div>
   </body>
 </html>
