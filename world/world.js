@@ -152,11 +152,14 @@ let clicks = {};
 function p3_tileClicked(i, j) {
   let key = [i, j];
   clicks[key] = 1 + (clicks[key] | 0);
+  let tmp = new Animal("crab", i, j);
+  console.log("animal2");
 }
 
 function p3_drawBefore() {}
 
 function p3_drawOverworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
+  
   noStroke();
 
   if (XXH.h32("tile:" + [i, j], worldSeed) % 4 == 0) {
@@ -174,14 +177,15 @@ function p3_drawOverworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
 
   let n = clicks[[i, j]] | 0;
   if (n % 2 == 1) {
-    fill(0, 0, 0, 32);
-    ellipse(0, 10, 10, 5);
-    translate(0, -10);
-    fill(255, 255, 100, 128);
-    ellipse(0, -10, 10, 10);
+    // fill(0, 0, 0, 32);
+    // ellipse(0, 10, 10, 5);
+    // translate(0, -10);
+    // fill(255, 255, 100, 128);
+    // ellipse(0, -10, 10, 10);
   }
 
   pop();
+  
 }
 
 function p3_drawUnderworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
@@ -212,6 +216,7 @@ function p3_drawUnderworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
 function p3_drawSelectedTile(i, j) {
   noFill();
   stroke(0, 255, 0, 128);
+  translate(0, -overworld.GetDrawHeight(overworld.GetHeight(i, j)));
 
   beginShape();
   vertex(-tw, 0);

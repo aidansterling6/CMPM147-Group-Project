@@ -51,14 +51,37 @@ let drawPalmTree = function(){
     return out;
 };
 
+var overworldImageStash = {
+    BaseTile: null,
+    SandTiles: [],
+    StoneTiles: [],
+    WaterTile: null,
+    PalmTrees: []
+};
+function GenerateOverworldTileImages(){
+    overworldImageStash.BaseTile = {w:tw*2, h: 50 + 2*th, img: simpleIsoTileImage(50, 0, tw, th, color(0, 0), color(100*0.8), color(100*0.9))};
+
+    for(let i = 1; i < 100; i++){
+        overworldImageStash.SandTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(246,215,176), color(246*0.8,215*0.8,176*0.8), color(246*0.9,215*0.9,176*0.9))});
+    }
+    for(let i = 1; i < 100; i++){
+        overworldImageStash.StoneTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9))});
+    }
+    overworldImageStash.WaterTile = {w:tw*2, h: overworld.GetDrawHeight(0.4) + 2*th, img: simpleIsoTileImage(overworld.GetDrawHeight(0.4), 0, tw, th, color(0, 0, 255), color(0, 0, 255), color(0, 0, 255))};
+
+    for(let i = 1; i < 30; i++){
+        overworldImageStash.PalmTrees.push(drawPalmTree());
+    }
+}
+
 
 class overworld{
     static multiplier = 300;
-    static BaseTile = null;
-    static SandTiles = [];
-    static StoneTiles = [];
-    static WaterTile = null;
-    static PalmTrees = [];
+    //static BaseTile = null;
+    //static SandTiles = [];
+    //static StoneTiles = [];
+    //static WaterTile = null;
+    //static PalmTrees = [];
     static GetHeight(i, j){
         let base = noise(i/7 + 325567, j/7 + 467353)*0.75  +  noise(i/7 + 543363, j/7 - 35346)*0.25;
         let height = base;
@@ -68,28 +91,13 @@ class overworld{
         if(height < 0.5){
             height = 0.49;
         }
-        height -= 0.4;
+        height -= 0.49;
         return height * overworld.multiplier;
-    }
-    static GenerateTileImages(){
-        overworld.BaseTile = {w:tw*2, h: 50 + 2*th, img: simpleIsoTileImage(50, 0, tw, th, color(0, 0), color(100*0.8), color(100*0.9))};
-
-        for(let i = 0; i < 100; i++){
-            overworld.SandTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(246,215,176), color(246*0.8,215*0.8,176*0.8), color(246*0.9,215*0.9,176*0.9))});
-        }
-        for(let i = 0; i < 100; i++){
-            overworld.StoneTiles.push({w:tw*2, h: i + 2*th, img: simpleIsoTileImage(i, 0, tw, th, color(150), color(150*0.8), color(150*0.9))});
-        }
-        overworld.WaterTile = {w:tw*2, h: overworld.GetDrawHeight(0.4) + 2*th, img: simpleIsoTileImage(overworld.GetDrawHeight(0.4), 0, tw, th, color(0, 0, 255), color(0, 0, 255), color(0, 0, 255))};
-
-        for(let i = 0; i < 30; i++){
-            overworld.PalmTrees.push(drawPalmTree());
-        }
     }
     static drawTile(i, j, WorldHeight){
         //stroke(75);
-        if(overworld.BaseTile){
-            image(overworld.BaseTile.img, -overworld.BaseTile.w/2, (-WorldHeight + 50) -  overworld.BaseTile.h + th , overworld.BaseTile.w, overworld.BaseTile.h);
+        if(overworldImageStash.BaseTile){
+            image(overworldImageStash.BaseTile.img, -overworldImageStash.BaseTile.w/2, (-WorldHeight + 50) -  overworldImageStash.BaseTile.h + th , overworldImageStash.BaseTile.w, overworldImageStash.BaseTile.h);
         }
         //simpleIsoTile(50, WorldHeight - 50, tw, th, color(0, 0), color(100*0.8), color(100*0.9));
 
@@ -108,16 +116,16 @@ class overworld{
                 c1 = color(246,215,176);
                 c2 = color(246,215,176);
                 c3 = color(246,215,176);
-                if(round(h) in overworld.SandTiles){
-                    let tmpTile = overworld.SandTiles[round(h)];
+                if(round(h) in overworldImageStash.SandTiles){
+                    let tmpTile = overworldImageStash.SandTiles[round(h)];
                     image(tmpTile.img, -tmpTile.w/2, (-WorldHeight) -  tmpTile.h + th , tmpTile.w, tmpTile.h);
                 }
             } else{
                 c1 = color(150);
                 c2 = color(150*0.8);
                 c3 = color(150*0.9);
-                if(round(h) in overworld.StoneTiles){
-                    let tmpTile = overworld.StoneTiles[round(h)];
+                if(round(h) in overworldImageStash.StoneTiles){
+                    let tmpTile = overworldImageStash.StoneTiles[round(h)];
                     image(tmpTile.img, -tmpTile.w/2, (-WorldHeight) -  tmpTile.h + th , tmpTile.w, tmpTile.h);
                 }
             }
@@ -125,8 +133,8 @@ class overworld{
             c1 = color(0, 0, 255);
             c2 = color(0, 0, 255);
             c3 = color(0, 0, 255);
-            if(overworld.WaterTile){
-                image(overworld.WaterTile.img, -overworld.WaterTile.w/2, (-WorldHeight) -  overworld.WaterTile.h + th , overworld.WaterTile.w, overworld.WaterTile.h);
+            if(overworldImageStash.WaterTile){
+                image(overworldImageStash.WaterTile.img, -overworldImageStash.WaterTile.w/2, (-WorldHeight) -  overworldImageStash.WaterTile.h + th , overworldImageStash.WaterTile.w, overworldImageStash.WaterTile.h);
             }
         }
 

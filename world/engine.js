@@ -19,6 +19,9 @@ let keyTime = 0;
 let ShiftY = 500;
 let speed = 15;
 //let speed = 5000;
+
+let ImageStash;
+
 let caveLevel = -100;
 let entityHandlers = {};
 
@@ -113,6 +116,60 @@ function worldOffsetToCamera([world_x, world_y]) {
   return new p5.Vector(camera_x, camera_y);
 }
 
+class Animal{
+    static currentID = 0;
+    static Animals = [];
+    constructor(type, x, y){
+        //console.log("animal");
+        this.type = type;
+        this.x = x;
+        this.y = y;
+        this.tx = x;
+        this.ty = y;
+        this.time = 0;
+        this.ID = Animal.currentID;
+        Animal.currentID++;
+        this.HandlerID = "" + this.type + ", " + this.ID;
+        entityHandlers[this.HandlerID] = 5;
+        let tmpSize = 20;
+        this.entity = new Entity(this.x, this.y, 1/3, 1/3, 10, 0, color(255, 0, 255), "mic", {img: ImageStash.crab, x:-tmpSize*0.5, y:-tmpSize, w:tmpSize, h:tmpSize}, this.HandlerID);
+        Animal.Animals.push(this);
+    }
+    static update(){
+        for(let i in Animal.Animals){
+            let animal = Animal.Animals[i];
+            if(animal.type === "crab"){
+                if(animal.time <= 0){
+                    for(let i = 0; i < 5; i++){
+                        animal.tx = animal.x + (Math.random() - 0.5)*3;
+                        animal.ty = animal.y + (Math.random() - 0.5)*3;
+                        if(overworld.GetHeight(animal.tx, animal.ty) > 0.5){
+                            animal.time = 30;
+                            break;
+                        }
+                    }
+                }
+                else{
+                animal.time--;
+                let tmpDist = dist(animal.x, animal.y, animal.tx, animal.ty);
+                if(tmpDist !== 0 && tmpDist > 0.12){
+                    animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
+                    animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
+                }
+            }
+            }
+
+
+            if(animal.entity){
+                animal.entity.x = animal.x;
+                animal.entity.y = animal.y;
+            }
+            //console.log("test");
+        }
+    }
+}
+
+
 //Class for drawing off-grid objects
 class Entity{
   static overworldEntities = [];
@@ -200,6 +257,10 @@ function preload() {
     window.p3_preload();
   }
 
+  ImageStash = {
+    crab: loadImage("./images/crab.png")
+  };
+
   // Audio preloads
   soundFormats('wav', 'mp3');
   overworld_ambience = loadSound('../audio-assets/559095__vital_sounds__high-wind-1.wav');
@@ -208,11 +269,29 @@ function preload() {
   bones_sfx = loadSound('../audio-assets/202102__spookymodem__rattling-bones.wav');
   osc = new p5.Oscillator('sine');
 }
+function removeCircular(obj) {
+    if(obj){
+    const seen = new Map();
+  
+    const recurse = obj => {
+      seen.set(obj, true);
+  
+      Object.entries(obj).forEach(([k, v]) => {
+        if (typeof v !== 'object') return;
+        if (seen.has(v)) delete obj[k];
+        else recurse(v);
+      });
+    };
+  
+    recurse(obj);
+}
+  }
 function setup() {
   let canvas = createCanvas(800, 400);
   canvas.parent("container");
 
   angleMode(DEGREES);
+  console.log("setup");
 
   player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0), "player", false);
   player2 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255), "player", null);
@@ -240,10 +319,12 @@ function setup() {
 
   rebuildWorld(input.value());
 
-  overworld.GenerateTileImages();
-  underworld.GenerateTileImages();
+  //overworld.GenerateTileImages();
+  //underworld.GenerateTileImages();
+  GenerateOverworldTileImages();
+  GenerateUnderworldTileImages();
 
-  // Audio Setup
+//   // Audio Setup
   cave_reverb = new p5.Reverb();
   cave_reverb.process(bones_sfx);
 
@@ -271,10 +352,10 @@ function rebuildWorld(key) {
 }
 
 function mouseClicked() {
-  overworld_ambience.play();
-  overworld_ambience.setLoop(true);
-  underworld_ambience.play();
-  underworld_ambience.setLoop(true);
+//   overworld_ambience.play();
+//   overworld_ambience.setLoop(true);
+//   underworld_ambience.play();
+//   underworld_ambience.setLoop(true);
   let world_pos = screenToWorld(
     [0 - mouseX, mouseY],
     [camera_offset.x, camera_offset.y]
@@ -285,8 +366,46 @@ function mouseClicked() {
   }
   return false;
 }
-
-
+function cleanUpVPasses(VPasses) {
+    for (let key in VPasses) {
+      if (VPasses.hasOwnProperty(key)) {
+        VPasses[key].tiles = null;
+        VPasses[key].lastTile = null;
+        VPasses[key].entities = null;
+      }
+    }
+  }
+  function stackSort(a, b) {
+    let chara = Entity.overworldEntities[a.entity];
+    let charb = Entity.overworldEntities[b.entity];
+    if (chara.baseHeight < charb.baseHeight) {
+      return -1;
+    } else if (chara.baseHeight > charb.baseHeight) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  }
+  function entitySort(a, b) {
+    let chara = Entity.overworldEntities[a];
+    let charb = Entity.overworldEntities[b];
+    if (chara.x + chara.y < charb.x + charb.y) {
+      return -1;
+    } else if (chara.x + chara.y > charb.x + charb.y) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  }
+  function compareFn(a, b) {
+    if (a.yValue < b.yValue) {
+      return -1;
+    } else if (a.yValue > b.yValue) {
+      return 1;
+    }
+    // a must be equal to b
+    return 0;
+  }
 function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
 
 
@@ -304,7 +423,7 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
         let tmpHeight = overworld.GetHeight(i, j);
         let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
         if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
-          let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
+          let img = overworldImageStash.PalmTrees[floor(rand%overworldImageStash.PalmTrees.length)];
           entityHandlers[i + ", " + j] = 5;
           let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize}, i + ", " + j);
 
@@ -326,7 +445,7 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
         let tmpHeight = overworld.GetHeight(i, j);
         let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
         if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
-          let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
+          let img = overworldImageStash.PalmTrees[floor(rand%overworldImageStash.PalmTrees.length)];
           entityHandlers[i + ", " + j] = 5;
           let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize}, i + ", " + j);
         }
@@ -336,7 +455,6 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
       }
     }
   }
-
 
 
 
@@ -539,15 +657,6 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
     }
   }
 
-  function compareFn(a, b) {
-    if (a.yValue < b.yValue) {
-      return -1;
-    } else if (a.yValue > b.yValue) {
-      return 1;
-    }
-    // a must be equal to b
-    return 0;
-  }
   let tmpArr = [];
   for(let key in VPasses){
     VPasses[key].farValue = [Infinity, Infinity];
@@ -585,28 +694,6 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
           }
         }
       }
-      function stackSort(a, b) {
-        let chara = Entity.overworldEntities[a.entity];
-        let charb = Entity.overworldEntities[b.entity];
-        if (chara.baseHeight < charb.baseHeight) {
-          return -1;
-        } else if (chara.baseHeight > charb.baseHeight) {
-          return 1;
-        }
-        // a must be equal to b
-        return 0;
-      }
-      function entitySort(a, b) {
-        let chara = Entity.overworldEntities[a];
-        let charb = Entity.overworldEntities[b];
-        if (chara.x + chara.y < charb.x + charb.y) {
-          return -1;
-        } else if (chara.x + chara.y > charb.x + charb.y) {
-          return 1;
-        }
-        // a must be equal to b
-        return 0;
-      }
 
       stack.sort(stackSort);
       for(let o = 0; o < stack.length; o++){
@@ -628,12 +715,38 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
       stack = [];
     }
   }
+  for(let i = tmpArr.length - 1; i >= 0; i--){
+    tmpArr.splice(i, 1);
+  }
+  cleanUpVPasses(VPasses);
+  VPasses = null;
+  for(let i = stack.length - 1; i >= 0; i--){
+    stack.splice(i);
+  }
+//   for(let key in VPasses){
+//     delete VPasses[key];
+//   }
+//   for(let key in stack){
+//     delete stack[key];
+//   }
   if(mouseIsPressed){
     //console.log(Entity.overworldEntities.length);
     //console.log(overworld.PalmTrees.length);
     ////console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
       ////console.log(true && tmpArr[o].lastTile);
+    }
+  }
+  //VPasses = null;
+  //tmpArr = null;
+  //stack = null;
+  removeCircular(VPasses);
+  removeCircular(tmpArr);
+  removeCircular(stack);
+  
+  if(VPasses){
+    for(let key in VPasses){
+    delete VPasses[key];
     }
   }
 }
@@ -676,7 +789,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
       let minChar = -1;
       for(let index = 0; index < Entity.underworldEntities.length; index++){
         if(i - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].x + Entity.underworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].y + Entity.underworldEntities[index].height/2 && i + 0.5 - 1/32 >= Entity.underworldEntities[index].x - Entity.underworldEntities[index].width/2 && j + 0.5 - 1/32 >= Entity.underworldEntities[index].y - Entity.underworldEntities[index].height/2){
-          //simpleIsoTile(20, /*underworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+          simpleIsoTile(20, /*underworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
           Entity.underworldEntities[index].InWorld = true;
           let tmpHeight = underworld.GetHeight(i, j);
           if(tmpHeight > Entity.underworldEntities[index].baseHeight){
@@ -699,7 +812,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
       let minChar = -1;
       for(let index = 0; index < Entity.underworldEntities.length; index++){
         if(i - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].x + Entity.underworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].y + Entity.underworldEntities[index].height/2 && i + 0.5 - 1/32 >= Entity.underworldEntities[index].x - Entity.underworldEntities[index].width/2 && j + 0.5 - 1/32 >= Entity.underworldEntities[index].y - Entity.underworldEntities[index].height/2){
-          //simpleIsoTile(20, /*underworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
+          simpleIsoTile(20, /*underworld.GetHeight(i, j)*100*/-ShiftY + 500, tw/3, th/3, color(255, 0, 0), color(255, 0, 0), color(255, 0, 0));
           Entity.underworldEntities[index].InWorld = true;
           let tmpHeight = underworld.GetHeight(i, j);
           if(tmpHeight > Entity.underworldEntities[index].baseHeight){
@@ -729,7 +842,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
           if(Entity.underworldEntities[index].InWorld){
             if(i - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].x + Entity.underworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].y + Entity.underworldEntities[index].height/2){
               if(Entity.underworldEntities[index].farValue[0] + Entity.underworldEntities[index].farValue[1] < minij[0] + minij[1]){
-                minij = Entity.underworldEntities[index].farValue;
+                minij = [Entity.underworldEntities[index].farValue[0], Entity.underworldEntities[index].farValue[1]];
                 minChar = index;
               }
               if(Entity.underworldEntities[index].farValue[0] === i && Entity.underworldEntities[index].farValue[1] === j){
@@ -788,7 +901,7 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
         if(Entity.underworldEntities[index].InWorld){
           if(i - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].x + Entity.underworldEntities[index].width/2 && j - 1 + 0.5 - 1/32 <= Entity.underworldEntities[index].y + Entity.underworldEntities[index].height/2){
             if(Entity.underworldEntities[index].farValue[0] + Entity.underworldEntities[index].farValue[1] < minij[0] + minij[1]){
-              minij = Entity.underworldEntities[index].farValue;
+              minij = [Entity.underworldEntities[index].farValue[0], Entity.underworldEntities[index].farValue[1]];
               minChar = index;
             }
             if(Entity.underworldEntities[index].farValue[0] === i && Entity.underworldEntities[index].farValue[1] === j){
@@ -926,18 +1039,18 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
       stack = [];
     }
   }
-  if(mouseIsPressed){
-    ////console.log(tmpArr);
-    for(let o = 0; o < tmpArr.length; o++){
-      ////console.log(true && tmpArr[o].lastTile);
-    }
-  }
+  
 }
 let bjustMoved = true;
-
+let disable = false;
 function draw() {
+    if(mouseIsPressed){
+        disable = true;
+    }
 
     background(255);
+
+    Animal.update();
 
   let overworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.0, 0.8);
   let underworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.8, 0.0);
@@ -1082,6 +1195,18 @@ function draw() {
     if(i < 0){
       i = 0;
     }
+
+
+
+    if(mouseIsPressed){
+        // console.log(Entity.underworldEntities.length);
+        // console.log(Entity.overworldEntities.length);
+        // console.log(overworld.PalmTrees.length);
+        // console.log(underworld.BlueOreTiles.length);
+        // console.log(overworld.StoneTiles.length);
+        //console.log(entityHandlers.keys.length);
+    }
+
   }
 
 
@@ -1095,7 +1220,8 @@ function draw() {
   if (window.p3_drawAfter) {
     window.p3_drawAfter();
   }
-  drawPalmTree(300, 300);
+  //drawPalmTree(300, 300);
+
 }
 
 // Display a discription of the tile at world_x, world_y.
