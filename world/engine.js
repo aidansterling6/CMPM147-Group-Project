@@ -33,7 +33,7 @@ function worldToScreen([world_x, world_y], [camera_x, camera_y]) {
 }
 
 function cameraToEntity(entity, amount){
-  //console.log(entity.baseHeight);
+  ////console.log(entity.baseHeight);
   let tmp = worldToScreen([entity.x, entity.y], [0, 0]);
   let tmpBase;
   let tmpShift;
@@ -47,13 +47,13 @@ function cameraToEntity(entity, amount){
     }
   let targetX = -tmp[0] - width/2;
   let targetY = -tmp[1] + height/2 + tmpBase-tmpShift;
-  //console.log(camera_offset.y);
+  ////console.log(camera_offset.y);
   camera_offset.x = camera_offset.x*(1-amount) + targetX*amount;
   camera_offset.y = camera_offset.y*(1-amount) + targetY*amount;
 }
 
 function cameraToEntityUsing(entity, amount, level){
-  //console.log(entity.baseHeight);
+  ////console.log(entity.baseHeight);
   let tmp = worldToScreen([entity.x, entity.y], [0, 0]);
   let tmpBase;
   let tmpShift;
@@ -77,7 +77,7 @@ function cameraToEntityUsing(entity, amount, level){
 
   let targetX = -tmp[0] - width/2;
   let targetY = -tmp[1] + height/2 + tmpBase-tmpShift;
-  //console.log(camera_offset.y);
+  ////console.log(camera_offset.y);
   camera_offset.x = camera_offset.x*(1-amount) + targetX*amount;
   camera_offset.y = camera_offset.y*(1-amount) + targetY*amount;
 }
@@ -164,7 +164,7 @@ class Entity{
           let tmpShift = ShiftY - 500;
           if(screen_y < 400 + 16*8){
           if(this.image){
-            image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
+            //image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
           }
           else{
             simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
@@ -177,7 +177,7 @@ class Entity{
             let tmpShift = ShiftY;
             if(screen_y < 400 + 16*8){
             if(this.image){
-              image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
+              //image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
             }
             else{
               simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
@@ -628,11 +628,11 @@ function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
     }
   }
   if(mouseIsPressed){
-    console.log(Entity.overworldEntities.length);
-    console.log(overworld.PalmTrees.length);
-    //console.log(tmpArr);
+    //console.log(Entity.overworldEntities.length);
+    //console.log(overworld.PalmTrees.length);
+    ////console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
-      //console.log(true && tmpArr[o].lastTile);
+      ////console.log(true && tmpArr[o].lastTile);
     }
   }
 }
@@ -926,9 +926,9 @@ function drawUnderworld(world_offset, x0, y0, x1, y1, centerx, centery){
     }
   }
   if(mouseIsPressed){
-    //console.log(tmpArr);
+    ////console.log(tmpArr);
     for(let o = 0; o < tmpArr.length; o++){
-      //console.log(true && tmpArr[o].lastTile);
+      ////console.log(true && tmpArr[o].lastTile);
     }
   }
 }
@@ -936,19 +936,21 @@ let bjustMoved = true;
 
 function draw() {
 
+    background(255);
+
   let overworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.0, 0.8);
   let underworld_ambience_volume = map(ShiftY, caveLevel, 500, 0.8, 0.0);
 
   let bird_rate = random(0, 1) * random(0, 1);
   if (bird_rate > 0.85 && !bird_sfx.isPlaying()) {
-    console.log("caw");
+    //console.log("caw");
     bird_sfx.setVolume(min(overworld_ambience_volume, random(0.3, 0.7)));
     bird_sfx.play();
   }
 
   let bone_rate = noise(0.07 * frameCount);
   if (bone_rate > 0.75 && !bones_sfx.isPlaying()) {
-    console.log("rattle");
+    //console.log("rattle");
     bones_sfx.setVolume(min(underworld_ambience_volume, random(0.3, 0.7)));
     bones_sfx.play();
   }
@@ -1063,7 +1065,7 @@ function draw() {
   for(let i = 0; i < Entity.overworldEntities.length; i++){
     if(Entity.overworldEntities[i].type === "dynamic" && !entityHandlers[Entity.overworldEntities[i].HandlerID]){
       Entity.overworldEntities.splice(i, 1);
-      console.log("splice");
+      //console.log("splice");
       i--;
     }
     if(i < 0){
@@ -1073,7 +1075,7 @@ function draw() {
   for(let i = 0; i < Entity.underworldEntities.length; i++){
     if(Entity.underworldEntities[i].type === "dynamic" && !entityHandlers[Entity.overworldEntities[i].HandlerID]){
       Entity.underworldEntities.splice(i, 1);
-      console.log("splice");
+      //console.log("splice");
       i--;
     }
     if(i < 0){
@@ -1128,27 +1130,31 @@ function drawTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c) {
 }
 
 function drawOverworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c, i) {
-  let [screen_x, screen_y] = worldToScreen(
-    [world_x, world_y],
-    [camera_x, camera_y]
-  );
-  push();
-  translate(0 - screen_x, screen_y);
-  if (window.p3_drawOverworldTile) {
-    window.p3_drawOverworldTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
-  }
-  pop();
+    if(ShiftY !== 0){
+        let [screen_x, screen_y] = worldToScreen(
+            [world_x, world_y],
+            [camera_x, camera_y]
+        );
+        push();
+        translate(0 - screen_x, screen_y);
+        if (window.p3_drawOverworldTile) {
+            window.p3_drawOverworldTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
+        }
+        pop();
+    }
 }
 
 function drawUnderworldTile([world_x, world_y], [camera_x, camera_y], x1, y1, x2, y2, c, i) {
-  let [screen_x, screen_y] = worldToScreen(
-    [world_x, world_y],
-    [camera_x, camera_y]
-  );
-  push();
-  translate(0 - screen_x, screen_y);
-  if (window.p3_drawUnderworldTile) {
-    window.p3_drawUnderworldTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
-  }
-  pop();
+    if(ShiftY !== 500){
+        let [screen_x, screen_y] = worldToScreen(
+        [world_x, world_y],
+        [camera_x, camera_y]
+    );
+    push();
+    translate(0 - screen_x, screen_y);
+    if (window.p3_drawUnderworldTile) {
+        window.p3_drawUnderworldTile(world_x, world_y, x1, y1, x2, y2, screen_x, screen_y, c);
+    }
+    pop();
+    }
 }

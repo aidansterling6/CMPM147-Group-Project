@@ -1,3 +1,4 @@
+"use strict";
 class underworld {
   static multiplier = 200;
   //static BaseTile = null;
