@@ -141,14 +141,28 @@ class Animal{
             let animal = Animal.Animals[i];
             if(animal.type === "crab"){
                 if(animal.time <= 0){
+                  let tmpDist = dist(animal.x, animal.y, animal.tx, animal.ty);
+                  if(tmpDist > 0.8){
+                    animal.time = 30;
+                    animal.x -= ((animal.x - animal.tx)/tmpDist)*0.1;
+                    animal.y -= ((animal.y - animal.ty)/tmpDist)*0.1;
+                    continue;
+                  }
+                  let flag = false;
+                  for(let d = 3; d < 15; d += 2){
                     for(let i = 0; i < 5; i++){
-                        animal.tx = animal.x + (Math.random() - 0.5)*3;
-                        animal.ty = animal.y + (Math.random() - 0.5)*3;
-                        if(overworld.GetHeight(animal.tx, animal.ty) > 0.5){
+                        animal.tx = round(animal.x + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
+                        animal.ty = round(animal.y + (Math.random() - 0.5)*d) + (Math.random()-0.5)*0.8;
+                        if(overworld.GetHeight(round(animal.tx), round(animal.ty)) > 0.5){
                             animal.time = 30;
+                            flag = true;
                             break;
                         }
                     }
+                    if(flag){
+                      break;
+                    }
+                  }
                 }
                 else{
                 animal.time--;
