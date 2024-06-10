@@ -118,9 +118,11 @@ class Entity{
   static underworldEntities = [];
   static entities = [];
   static CurrentID = 0;
-  constructor(x, y, width, height, tileHeight, world, Color){
+  constructor(x, y, width, height, tileHeight, world, Color, type, image){
       this.ID = Entity.CurrentID;
       Entity.CurrentID++;
+      this.type = type;
+      this.image = image;
       this.x = x;
       this.y = y;
       this.farValue = [Infinity, Infinity];
@@ -158,13 +160,23 @@ class Entity{
           if(this.world === 0){
           let tmpBase = this.drawHeight;
           let tmpShift = ShiftY - 500;
-          simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+          if(this.image){
+            image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
           }
+          else{
+            simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+          }
+        }
 
           if(this.world === 1){
             let tmpBase = this.drawHeight;
             let tmpShift = ShiftY;
-            simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+            if(this.image){
+              image(this.image.img, this.image.x, this.image.y - tmpBase + tmpShift, this.image.w, this.image.h);
+            }
+            else{
+              simpleIsoTile(this.tileHeight, tmpBase-tmpShift, tw*this.width, th*this.height, this.color, color(red(this.color) * 0.8, green(this.color) * 0.8, blue(this.color) * 0.8), color(red(this.color) * 0.9, green(this.color) * 0.9, blue(this.color) * 0.9));
+            }
           }
           pop();
   }
@@ -194,18 +206,13 @@ function setup() {
   let canvas = createCanvas(800, 400);
   canvas.parent("container");
 
-  player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0));
-  player2 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
+  angleMode(DEGREES);
+
+  player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0), "player", false);
+  player2 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255), "player", null);
 
   //player3 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(255, 0, 0));
   //player4 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
-
-  for(let t = 0; t < 20; t++){
-    new Entity((Math.random()*2-1) * 7, (Math.random()*2-1) * 7, 1/6, 1/6, 50, 0, color(0, 150, 0));
-  }
-  for(let t = 0; t < 20; t++){
-    new Entity((Math.random()*2-1) * 7, (Math.random()*2-1) * 7, 1/5, 1/5, 100, 1, color(100, 100, 100));
-  }
 
   camera_offset = new p5.Vector(-width / 2, height / 2);
   camera_velocity = new p5.Vector(0, 0);
@@ -274,6 +281,45 @@ function mouseClicked() {
 
 
 function drawOverworld(world_offset, x0, y0, x1, y1, centerx, centery){
+
+
+  let PalmSize = 100;
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      let [i, j] = tileRenderingOrder([
+        x + world_offset.x,
+        y - world_offset.y
+      ]);
+      let rand = XXH.h32("tile: " + i + ", " + j, worldSeed) % 100;
+      let randx = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+      let randy = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+      let tmpHeight = overworld.GetHeight(i, j);
+      let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
+      if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
+        let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
+        let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize});
+      }
+    }
+    for (let x = x0; x < x1; x++) {
+      let [i, j] = tileRenderingOrder([
+        x + 0.5 + world_offset.x,
+        y + 0.5 - world_offset.y
+      ]);
+      let rand = XXH.h32("tile: " + i + ", " + j, worldSeed) % 100;
+      let randx = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+      let randy = ((XXH.h32("tile: " + i + ", " + j, worldSeed) % 200)*0.01 - 1)*0.45;
+      let tmpHeight = overworld.GetHeight(i, j);
+      let base = noise(i/7 - 4836, j/7 + 324637)*0.75 +  noise(i/7 - 3468543, j/7 - 35346)*0.25;
+      if(rand > 90 && tmpHeight > 0.5 && base > 0.4){
+        let img = overworld.PalmTrees[floor(rand%overworld.PalmTrees.length)];
+        let tmp = new Entity(i + randx, j + randy, 1/6, 1/6, 50, 0, color(0, 0, 255), "dynamic", {img: img, x: -PalmSize/2, y: -PalmSize, w:PalmSize, h:PalmSize});
+      }
+    }
+  }
+
+
+
+
   let VPasses = {};
   VPasses[-1] = {
     yValue: Infinity,
@@ -890,6 +936,12 @@ function draw() {
   underworld_ambience.setVolume(underworld_ambience_volume);
 
   
+
+  //let e = new Entity(Math.random(), Math.random(), 1/3, 1/3, 20, 0, color(0, 0, 255), "dynamic");
+
+
+
+
   let camera_delta = new p5.Vector(0, 0);
 
   if(keyIsDown(69) && keyTime <= 0){
@@ -982,6 +1034,26 @@ function draw() {
 
 
 
+  for(let i = 0; i < Entity.overworldEntities.length; i++){
+    if(Entity.overworldEntities[i].type === "dynamic"){
+      Entity.overworldEntities.splice(i, 1);
+      i--;
+    }
+    if(i < 0){
+      i = 0;
+    }
+  }
+  for(let i = 0; i < Entity.underworldEntities.length; i++){
+    if(Entity.underworldEntities[i].type === "dynamic"){
+      Entity.underworldEntities.splice(i, 1);
+      i--;
+    }
+    if(i < 0){
+      i = 0;
+    }
+  }
+
+
 
 
 
@@ -992,6 +1064,7 @@ function draw() {
   if (window.p3_drawAfter) {
     window.p3_drawAfter();
   }
+  drawPalmTree(300, 300);
 }
 
 // Display a discription of the tile at world_x, world_y.

@@ -130,11 +130,11 @@ function p3_drawOverworldTile(i, j, x1, y1, x2, y2, screen_x, screen_y, c) {
 
   let n = clicks[[i, j]] | 0;
   if (n % 2 == 1) {
-    //fill(0, 0, 0, 32);
-    //ellipse(0, 0, 10, 5);
-    //translate(0, -10);
-    //fill(255, 255, 100, 128);
-    //ellipse(0, 0, 10, 10);
+    fill(0, 0, 0, 32);
+    ellipse(0, 10, 10, 5);
+    translate(0, -10);
+    fill(255, 255, 100, 128);
+    ellipse(0, -10, 10, 10);
   }
 
   pop();
