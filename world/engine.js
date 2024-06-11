@@ -454,6 +454,10 @@ function setup() {
 }
 
 function rebuildWorld(key) {
+  Entity.overworldEntities = [];
+  Entity.underworldEntities = [];
+  entityHandlers = [];
+
   if (window.p3_worldKeyChanged) {
     window.p3_worldKeyChanged(key);
   }
