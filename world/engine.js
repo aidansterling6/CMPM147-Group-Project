@@ -396,8 +396,7 @@ function setup() {
   angleMode(DEGREES);
   console.log("setup");
 
-  player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0), "player", false);
-  player2 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255), "player", null);
+  
 
   //player3 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(255, 0, 0));
   //player4 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255));
@@ -457,7 +456,8 @@ function rebuildWorld(key) {
   Entity.overworldEntities = [];
   Entity.underworldEntities = [];
   entityHandlers = [];
-
+  player1 = new Entity(0, 0, 1/3, 1/3, 20, 0, color(255, 0, 0), "player", false);
+  player2 = new Entity(0, 0, 1/3, 1/3, 20, 1, color(0, 0, 255), "player", null);
   if (window.p3_worldKeyChanged) {
     window.p3_worldKeyChanged(key);
   }
