@@ -4,6 +4,11 @@ body {
   font-family: helvetica, arial, sans-serif;
   margin: 2em;
   background-color: #151515
+  background-image: url("./image-assets/cavesbelowbackground.png");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    color: white;
 }
 
 h1 {
